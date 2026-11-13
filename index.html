@@ -70,7 +70,7 @@ html,body{height:100%;margin:0;background:#8fb4e6;overflow:hidden;overscroll-beh
 #vol input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:#fff;border:0;box-shadow:0 0 12px rgba(255,255,255,.7)}
 #vol input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:0;box-shadow:0 0 12px rgba(255,255,255,.7)}
 #vol .vh{padding:2px 0 4px;font-size:12px;color:rgba(255,255,255,.6);text-align:center}
-@media (max-width:470px){#hud{gap:5px}.hb{width:38px;height:38px;font-size:17px}#seats{top:calc(env(safe-area-inset-top,0px) + 58px);height:30px;padding:0 10px;gap:5px}#vol{top:calc(env(safe-area-inset-top,0px) + 58px)}#pipv.p-tl,#pipv.p-tr{top:calc(env(safe-area-inset-top,0px) + 100px)}}
+@media (max-width:470px){#hud{gap:4px}.hb{width:34px;height:34px;font-size:15px}#seats{top:calc(env(safe-area-inset-top,0px) + 58px);height:30px;padding:0 10px;gap:5px}#vol{top:calc(env(safe-area-inset-top,0px) + 58px)}#pipv.p-tl,#pipv.p-tr{top:calc(env(safe-area-inset-top,0px) + 100px)}}
 #pipv{position:absolute;width:150px;height:112px;object-fit:cover;border-radius:26px;-webkit-mask-image:radial-gradient(ellipse 72% 72% at 50% 50%,#000 55%,transparent 100%);mask-image:radial-gradient(ellipse 72% 72% at 50% 50%,#000 55%,transparent 100%);cursor:pointer;z-index:3;transition:opacity .35s,transform .35s}
 #pipv.in{opacity:0;transform:scale(.6)}
 #pipv.p-br{right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 18px)}
@@ -109,6 +109,7 @@ html,body{height:100%;margin:0;background:#8fb4e6;overflow:hidden;overscroll-beh
     <button id="clr" class="hb" type="button" aria-label="Clear the words over your head (X)" hidden>🧹</button>
     <button id="invite" class="hb" type="button" aria-label="Copy invite link">🔗</button>
     <button id="vbtn" class="hb" type="button" aria-label="Volume (O)">🔊</button>
+    <button id="gbtn" class="hb" type="button" aria-label="Change the sky color (G)">🎨</button>
     <button id="view" class="hb" type="button" aria-label="View from above (V)">◎</button>
     <button id="info" class="hb" type="button" aria-label="How it works (I)">i</button>
   </div>
@@ -132,8 +133,8 @@ html,body{height:100%;margin:0;background:#8fb4e6;overflow:hidden;overscroll-beh
       <section><h3>🎙️ Talk</h3>
         <div class="kg"><span><kbd>M</kbd> 🎙️</span><em>mic on / off · the first time, your browser asks</em></div>
         <div class="kg"><span><kbd>T</kbd></span><em>hold to talk while your mic is off</em></div>
-        <div class="kg"><span><kbd>C</kbd> 🎥</span><em>camera on / off · a ring spins around your orb</em></div>
-        <div class="kg"><span>👆👆</span><em>double-click an orb with a ring to see their camera · again or Esc to close</em></div>
+        <div class="kg"><span><kbd>C</kbd> 🎥</span><em>camera on / off · a soft aura glows around your orb</em></div>
+        <div class="kg"><span>👆👆</span><em>double-click an orb with an aura to see their camera · again or Esc to close</em></div>
         <div class="kg"><span><kbd>D</kbd> ⧉</span><em>while their camera is open: dock it small in a corner, like yours</em></div>
         <div class="kg"><span><kbd>P</kbd> 👆</span><em>move the docked camera to the next corner · double-tap it to open big</em></div>
         <div class="kg"><span>👀</span><em>the number on 🎥 is how many are watching you</em></div>
@@ -147,6 +148,7 @@ html,body{height:100%;margin:0;background:#8fb4e6;overflow:hidden;overscroll-beh
       <section><h3>👥 Room</h3>
         <div class="kg"><span>🔗</span><em>copy the invite link · same link = same room</em></div>
         <div class="kg"><span>● ● ● ●</span><em>pick blue, red, green or yellow when you join</em></div>
+        <div class="kg"><span><kbd>G</kbd> 🎨</span><em>change the sky color · if others pick too, the sky blends between everyone's picks</em></div>
         <div class="kg"><span><kbd>N</kbd></span><em>make a new, empty room</em></div>
         <div class="kg"><span><kbd>I</kbd></span><em>these instructions</em></div>
         <div class="kg"><span><kbd>Esc</kbd></span><em>close</em></div>
@@ -187,6 +189,7 @@ const SEATS = [
   { n: 'green', css: '#3fd66a', glow: '90,220,120', g: ['#b0f5c0', '#2fbf5a', '#1a8a3c', '#d8ffe0'] },
   { n: 'yellow', css: '#ffd23f', glow: '255,215,70', g: ['#fff0a0', '#f0c020', '#b08a10', '#fff8d0'] }];
 const DOT = ['🔵', '🔴', '🟢', '🟡'];
+SEATS.forEach(S => { S.c3 = new THREE.Color(S.css).lerp(new THREE.Color('#ffffff'), .45); });
 const PADS = [0, 1, 2, 3].map(i => { const a = i / 4 * TAU; return new V3(Math.sin(a) * PAD_R, 0, -Math.cos(a) * PAD_R); });
 
 /* ---------- renderer, scene, sky (BLUE42's mirror sky) ---------- */
@@ -208,6 +211,17 @@ const skyMat = new THREE.ShaderMaterial({
     ' gl_FragColor = vec4(c, 1.0); }'].join('\n')
 });
 const sky = new THREE.Mesh(new THREE.SphereGeometry(14000, 48, 24), skyMat); scene.add(sky);
+// G: change the sky. Everyone's pick counts, and the sky blends between them.
+const SKIES = [
+  { n: 'blue', c: ['#295fd1', '#6199ed', '#cce0f7', '#97bdf2'] },
+  { n: 'dusk', c: ['#4b3a9e', '#b77bc6', '#ffdbe2', '#e6a9c9'] },
+  { n: 'peach', c: ['#d9653b', '#f2a35e', '#ffeacb', '#f5c08e'] },
+  { n: 'mint', c: ['#1f8a7a', '#5cc9b0', '#d9f7ed', '#9fe3cf'] },
+  { n: 'lilac', c: ['#5b4fc4', '#9b8fe6', '#ebe6ff', '#c4baf5'] },
+  { n: 'cloud', c: ['#8ea4bd', '#c4d2e1', '#f5f8fb', '#dce5ee'] },
+  { n: 'night', c: ['#0a1330', '#1c2e66', '#5a70aa', '#2a3c78'] }].map(s => ({ n: s.n, c: s.c.map(x => new THREE.Color(x)) }));
+const SKYU = ['top', 'mid', 'hor', 'low'], skyGoal = SKIES[0].c.map(c => c.clone());
+let myG = -1; try { const v = +localStorage.getItem('onaroom.sky'); if (Number.isInteger(v) && v >= 0 && v < SKIES.length && localStorage.getItem('onaroom.sky') !== null) myG = v; } catch (e) {}
 const sheen = new THREE.Mesh(new THREE.CircleGeometry(15000, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: .045, depthWrite: false })); sheen.position.y = .02; scene.add(sheen);
 // the mirror: everything that floats gets a twin below
 const TWINS = [];
@@ -338,10 +352,10 @@ function freshRoom() { location.hash = newCode(); location.reload(); }
 
 let room = null, selfId = '', mySeat = -1, myName = '', netOK = false, roomFull = false;
 const OTHERS = new Map();   // peerId -> avatar
-let A_hi, A_pos, A_say, A_cam, A_want;
+let A_hi, A_pos, A_say, A_cam, A_want, A_sky;
 const clean = (s, n) => String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f\u200b-\u200f\u2028-\u202e\u2060-\u206f]/g, '').trim().slice(0, n);
 let joinedAt = 0;
-const hiMsg = () => ({ n: myName, s: mySeat, t: joinedAt, m: me.msg || '', c: camStream ? 1 : 0 });
+const hiMsg = () => ({ n: myName, s: mySeat, t: joinedAt, m: me.msg || '', c: camStream ? 1 : 0, g: myG });
 function usedSeats() { const u = new Set(); for (const [, A] of OTHERS) if (A.have && A.seat >= 0) u.add(A.seat); return u; }
 function pickSeat() { const u = usedSeats(); if (!u.has(prefSeat)) return prefSeat; for (let i = 0; i < MAX; i++) if (!u.has(i)) return i; return 0; }
 function takeSeat(s, spawn) {
@@ -354,7 +368,8 @@ function connect() {
   if (!window.Trystero || !window.RTCPeerConnection) { $('net').textContent = 'This copy is offline: open it from its GitHub link to fly together.'; return; }
   try { const cfg = { appId: APP, maxUsers: MAX, identity: 'none' }; if (Array.isArray(window.__RELAYS)) cfg.relayConfig = { urls: window.__RELAYS }; room = Trystero.joinRoom(cfg, CODE); } catch (e) { room = null; $('net').textContent = 'Could not reach the sky network. Flying solo.'; return; }
   netOK = true;
-  A_hi = room.makeAction('hi'); A_pos = room.makeAction('pos'); A_say = room.makeAction('say'); A_cam = room.makeAction('cam'); A_want = room.makeAction('want');
+  A_hi = room.makeAction('hi'); A_pos = room.makeAction('pos'); A_say = room.makeAction('say'); A_cam = room.makeAction('cam'); A_want = room.makeAction('want'); A_sky = room.makeAction('sky');
+  A_sky.onMessage((d, { peerId }) => { const A = other(peerId); A.g = Number.isInteger(d) && d >= 0 && d < SKIES.length ? d : -1; const names = aimSky(); if (A.have && A.g >= 0) tip((A.name || SEATS[A.seat].n) + ' picked ' + SKIES[A.g].n + (names.length > 1 ? ' · blending ' + names.join(' + ') : ''), 2600); });
   A_cam.onMessage((d, { peerId }) => setCamFlag(other(peerId), d === true));
   A_want.onMessage((d, { peerId }) => { if (d === true) { if (camStream && OTHERS.has(peerId)) { WATCH.add(peerId); room.addStream(camStream, { target: peerId, metadata: { kind: 'cam' } }).catch(() => {}); } } else { WATCH.delete(peerId); if (camStream) try { room.removeStream(camStream, { target: peerId }); } catch (e) {} } camBadge(); });
   room.getSelf().then(s => { selfId = s.peerId; }).catch(() => {});
@@ -363,13 +378,14 @@ function connect() {
     if (mySeat >= 0) A_hi.send(hiMsg(), { target: peerId }).catch(() => {});
     if (micStream) room.addStream(micStream, { target: peerId, metadata: { kind: 'mic' } }).catch(() => {});
   });
-  room.onPeerLeave(({ peerId }) => { WATCH.delete(peerId); camBadge(); const A = OTHERS.get(peerId); if (!A) return; if (VIEW && VIEW.A === A) closeView(true); if (A.ring) scene.remove(A.ring); if (A.have) note(A, 'floated off'); removeAvatar(A); if (A.v) { try { A.v.g.disconnect(); A.v.pan.disconnect(); } catch (e) {} } if (A.el) { A.el.srcObject = null; } OTHERS.delete(peerId); seatsUI(); });
+  room.onPeerLeave(({ peerId }) => { WATCH.delete(peerId); camBadge(); const A = OTHERS.get(peerId); if (!A) return; if (VIEW && VIEW.A === A) closeView(true); if (A.ring) scene.remove(A.ring); if (A.have) note(A, 'floated off'); removeAvatar(A); if (A.v) { try { A.v.g.disconnect(); A.v.pan.disconnect(); } catch (e) {} } if (A.el) { A.el.srcObject = null; } OTHERS.delete(peerId); seatsUI(); aimSky(); });
   A_hi.onMessage((d, { peerId }) => {
     if (!d || typeof d !== 'object') return; const A = other(peerId), seat = Number.isInteger(d.s) && d.s >= 0 && d.s < MAX ? d.s : -1, name = clean(d.n, 18);
     const first = !A.have; A.have = seat >= 0; if (seat >= 0) setSeat(A, seat); setLabel(A, name || (seat >= 0 ? SEATS[seat].n : ''));
     if (first && A.have) note(A, 'floated in');
     { const m = clean(d.m, 80); if (m !== A.msg) { A.msg = m; setBubble(A, m); } }
     setCamFlag(A, d.c === 1);
+    { const g = Number.isInteger(d.g) && d.g >= 0 && d.g < SKIES.length ? d.g : -1; if (g !== A.g) { A.g = g; aimSky(); } }
     // two people on one seat: the later id moves over
     A.t = Number.isFinite(d.t) ? d.t : 0;
     if (seat >= 0 && seat === mySeat && (joinedAt > A.t || (joinedAt === A.t && selfId > peerId))) takeSeat(pickSeat(), time - beganAt < 10);   // whoever came first keeps the seat
@@ -440,6 +456,53 @@ function level(m) { if (!m) return 0; m.an.getByteTimeDomainData(m.buf); let s =
 const inCommons = p => Math.hypot(p.x, p.z) < COMMONS;
 function voiceGain(A) { if (inCommons(pos) && inCommons(A.pos)) return 1; const d = pos.distanceTo(A.pos); return d < 50 ? 1 : clamp(1 - (d - 50) / 700, .12, 1); }
 
+/* ---------- birds: little flocks on a shared clock, so everyone sees the same ones ---------- */
+const BIRDS = (() => {
+  const wingG = new THREE.BufferGeometry(); wingG.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, -.55, 0, 0, .45, -1.7, 0, .15], 3));
+  const bodyG = new THREE.BufferGeometry(); bodyG.setAttribute('position', new THREE.Float32BufferAttribute([0, .02, -.95, .14, 0, .45, -.14, 0, .45], 3));
+  const mat = new THREE.MeshBasicMaterial({ color: '#1f2c4c', transparent: true, opacity: .62, side: THREE.DoubleSide, depthWrite: false, fog: false });
+  const twinM = mat.clone(); twinM.opacity = .22;
+  const rnd = (s => () => (s = (s * 16807) % 2147483647) / 2147483647)(42);   // the same random for everyone
+  const make = m => { const g = new THREE.Group(), L = new THREE.Mesh(wingG, m), R = new THREE.Mesh(wingG, m); R.scale.x = -1; g.add(L, R, new THREE.Mesh(bodyG, m)); scene.add(g); return { g, L, R }; };
+  const flocks = [];
+  for (let f = 0; f < 5; f++) {
+    const F = { R: (f < 2 ? 70 : 170) + rnd() * (f < 2 ? 90 : 360), w: (.035 + rnd() * .03) * (rnd() < .5 ? -1 : 1), ph: rnd() * 6.28, h: (f < 2 ? 16 : 34) + rnd() * (f < 2 ? 22 : 60), wob: rnd() * 6.28, birds: [] };
+    const n = 6 + Math.floor(rnd() * 6);
+    for (let i = 0; i < n; i++) F.birds.push({ o: new V3((rnd() - .5) * 22, (rnd() - .5) * 7, (rnd() - .5) * 22), ph: rnd() * 6.28, sp: 8 + rnd() * 3, s: .8 + rnd() * .45, b: make(mat), t: make(twinM) });
+    flocks.push(F);
+  }
+  const at = (F, t, out) => { const a = F.ph + F.w * t, r = F.R + 40 * Math.sin(t * .05 + F.wob); return out.set(Math.cos(a) * r, F.h + 9 * Math.sin(t * .13 + F.wob), Math.sin(a) * r); };
+  const c0 = new V3(), c1 = new V3(), p = new V3(), q = new V3();
+  return function frame() {
+    const t = Date.now() / 1000;
+    for (const F of flocks) {
+      at(F, t, c0); at(F, t + .5, c1); const dir = c1.sub(c0).normalize();
+      for (const B of F.birds) {
+        p.copy(c0).add(B.o); p.x += 2.2 * Math.sin(t * .7 + B.ph); p.y += 1.4 * Math.sin(t * .9 + B.ph * 2); p.z += 2.2 * Math.cos(t * .6 + B.ph);
+        const glide = sm(-.35, .35, Math.sin(t * .4 + B.ph)), flap = .12 + glide * .62 * Math.sin(t * B.sp + B.ph);
+        for (const [X, ty] of [[B.b, 1], [B.t, -1]]) {
+          X.g.position.set(p.x, p.y * ty, p.z); q.set(p.x + dir.x, (p.y + dir.y) * ty, p.z + dir.z); X.g.lookAt(q);
+          X.g.scale.set(B.s * 2.4, B.s * 2.4 * ty, B.s * 2.4); X.L.rotation.z = flap; X.R.rotation.z = -flap;
+        }
+      }
+    }
+  };
+})();
+
+/* ---------- sky: everyone who has pressed G gets a say ---------- */
+function skyPicks() { const p = []; if (myG >= 0) p.push(myG); for (const [, A] of OTHERS) if (A.have && Number.isInteger(A.g) && A.g >= 0) p.push(A.g); return p; }
+function aimSky() {
+  const p = skyPicks(), list = p.length ? p : [0];
+  for (let k = 0; k < 4; k++) { skyGoal[k].setRGB(0, 0, 0); for (const i of list) { const c = SKIES[i].c[k]; skyGoal[k].r += c.r / list.length; skyGoal[k].g += c.g / list.length; skyGoal[k].b += c.b / list.length; } }
+  const names = [...new Set(p)].map(i => SKIES[i].n); return names;
+}
+function nextSky() {
+  myG = (Math.max(myG, 0) + 1) % SKIES.length; try { localStorage.setItem('onaroom.sky', String(myG)); } catch (e) {}
+  if (A_sky) A_sky.send(myG).catch(() => {});
+  const names = aimSky(); tip(names.length > 1 ? 'sky · ' + names.join(' + ') + ' · blended' : 'sky · ' + SKIES[myG].n, 2200);
+}
+function skyFrame(dt) { const k = 1 - Math.exp(-dt * 1.5); for (let i = 0; i < 4; i++) skyMat.uniforms[SKYU[i]].value.lerp(skyGoal[i], k); }
+
 /* ---------- volume: your orb's sound, everyone, and each person ---------- */
 const VOL = { orb: 1, all: 1 };
 try { const s = JSON.parse(localStorage.getItem('onaroom.vol') || '{}'); if (s.orb >= 0 && s.orb <= 1) VOL.orb = s.orb; if (s.all >= 0 && s.all <= 2) VOL.all = s.all; } catch (e) {}
@@ -492,15 +555,16 @@ async function toggleCam() {
   $('cam').classList.add('live'); setCamFlag(me, true); if (A_cam) A_cam.send(true).catch(() => {});
   tip('camera on · people double-click your orb to see you', 3500);
 }
-// the ring: a thin dashed circle that spins around an orb whose camera is on
-const RINGTEX = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d'); x.strokeStyle = 'rgba(255,255,255,.95)'; x.lineWidth = 4; x.setLineDash([14, 10]); x.beginPath(); x.arc(64, 64, 56, 0, Math.PI * 2); x.stroke(); return new THREE.CanvasTexture(c); })();
+// the aura: a soft gradient that breathes around an orb whose camera is on
+const RINGTEX = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d'), g = x.createRadialGradient(128, 128, 0, 128, 128, 128);
+  [[0, 0], [.34, 0], [.48, .35], [.6, .7], [.72, .38], [.86, .12], [1, 0]].forEach(([o, a]) => g.addColorStop(o, 'rgba(255,255,255,' + a + ')')); x.fillStyle = g; x.fillRect(0, 0, 256, 256); return new THREE.CanvasTexture(c); })();
 function setCamFlag(A, on) {
   A.cam = on;
-  if (on && !A.ring) { A.ring = new THREE.Sprite(new THREE.SpriteMaterial({ map: RINGTEX, transparent: true, depthWrite: false, opacity: .85 })); scene.add(A.ring); }
+  if (on && !A.ring) { A.ring = new THREE.Sprite(new THREE.SpriteMaterial({ map: RINGTEX, color: new THREE.Color(SEATS[Math.max(0, A.seat || 0)].css).lerp(new THREE.Color('#ffffff'), .45), transparent: true, depthWrite: false, opacity: .9, blending: THREE.AdditiveBlending })); scene.add(A.ring); }
   if (!on && A.ring) { scene.remove(A.ring); A.ring = null; }
   if (!on && VIEW && VIEW.A === A) closeView(true);
 }
-function ringFrame(A, dt) { if (!A.ring) return; A.ring.position.copy(A.sp.position); A.ring.scale.setScalar(A.sp.scale.x * 1.45); A.ring.material.rotation += dt * 1.2; A.ring.visible = A.sp.visible && !(VIEW && VIEW.A === A && VIEW.m > .2); }
+function ringFrame(A, dt) { if (!A.ring) return; const b = Math.sin(time * 1.6 + (A.seat || 0)); A.ring.position.copy(A.sp.position); A.ring.scale.setScalar(A.sp.scale.x * (1.75 + .1 * b)); A.ring.material.opacity = .7 + .2 * b; A.ring.material.color.copy(SEATS[Math.max(0, A.seat || 0)].c3); A.ring.visible = A.sp.visible && !(VIEW && VIEW.A === A && VIEW.m > .2); }
 // BLUE42's player frame (soft edge: a little round, the edges fade out)
 const CARD_FS = 'uniform sampler2D map; uniform vec2 size; uniform vec2 hb; uniform float rad; uniform float fade; uniform vec3 tint; uniform float feather; uniform float warp; uniform vec2 crop; varying vec2 vUv;' +
   'void main(){ vec2 p = (vUv - 0.5) * size; float ex = clamp(p.x / hb.x, -1.0, 1.0); float lim = hb.y * (1.0 + warp * 0.16 * (1.0 - ex * ex));' +
@@ -621,6 +685,7 @@ $('cam').addEventListener('click', toggleCam);
 $('talk').addEventListener('click', openChat);
 $('view').addEventListener('click', toggleView);
 $('vbtn').addEventListener('click', () => { startAudio(); toggleVol(); });
+$('gbtn').addEventListener('click', nextSky);
 $('vol').addEventListener('keydown', e => { if (e.key !== 'Escape') e.stopPropagation(); });
 $('invite').addEventListener('click', async () => {
   const url = location.origin + location.pathname + (CODE === 'lobby' ? '' : '#' + CODE); let ok = false; try { await navigator.clipboard.writeText(url); ok = true; } catch (e) {}
@@ -651,7 +716,8 @@ addEventListener('keydown', e => {
   if (!started) { if (k === 'i') toggleKeys(); return; }
   if (k === 'enter') { e.preventDefault(); openChat(); return; }
   if (k === 'escape') { if (VIEW && VIEW.open) closeView(); toggleKeys(false); toggleVol(false); return; }
-  if (e.repeat && 'imtvnxcop'.includes(k)) return;
+  if (e.repeat && 'imtvnxcopg'.includes(k)) return;
+  if (k === 'g') { nextSky(); return; }
   if (k === 'd' && VIEW && VIEW.open && !VIEW.dock && VIEW.el) { if (!e.repeat) dock(); return; }
   if (k === 'p') { if (VIEW && VIEW.dock) movePip(); return; }
   if (k === 'o') { toggleVol(); return; }
@@ -706,7 +772,7 @@ function frame(now) {
   camera.position.lerp(camT, 1 - Math.exp(-dt * (3.2 + viewK * 2)));
   camera.lookAt(look); camera.rotateZ(mv.roll * .35 * (1 - viewK));
   camera.fov = lerp(camera.fov, 60 + mv.speed * .25 * (1 - viewK), 1 - Math.exp(-dt * 3)); camera.updateProjectionMatrix();
-  sky.position.copy(camera.position);
+  sky.position.copy(camera.position); skyFrame(dt); BIRDS();
   // the commons breathes; it glows when you're inside it
   const inside = inCommons(pos); commons.material.opacity = lerp(commons.material.opacity, inside ? .85 : .45 + .1 * Math.sin(time * 1.4), 1 - Math.exp(-dt * 3)); commonsIn.material.opacity = lerp(commonsIn.material.opacity, inside ? .12 : .04, 1 - Math.exp(-dt * 3));
   PADM.forEach((m, i) => { m.material.opacity = (i === mySeat ? .75 : .4) + .1 * Math.sin(time * 1.2 + i); });
@@ -724,6 +790,7 @@ function frame(now) {
   viewFrame(dt); syncTwins(); listen(); engineFrame(); netFrame(now);
   renderer.render(scene, camera);
 }
+aimSky(); for (let i = 0; i < 4; i++) skyMat.uniforms[SKYU[i]].value.copy(skyGoal[i]);
 requestAnimationFrame(frame);
 seatsUI();
 if (Array.isArray(window.__RELAYS)) window.__T = { OTHERS, toggleWatch, get VIEW() { return VIEW; }, get seat() { return mySeat; }, get watch() { return WATCH.size; } };   // local test hook only
