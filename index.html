@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>BLUE42 · Together</title>
+<title>ONAROOM</title>
 <style>
 /* BLUE42 · Together: the sky, its mirror, the ring of 42, and up to four orbs who can talk. */
 :root{--ink:#fff;--dim:rgba(255,255,255,.78);--deep:#2a5bb8;--veil:rgba(30,70,150,.38);--f:"Helvetica Neue",Helvetica,Arial,sans-serif;color-scheme:light}
@@ -24,12 +24,12 @@ html,body{height:100%;margin:0;background:#8fb4e6;overflow:hidden;overscroll-beh
 #full{color:#ffe0e0!important;font-weight:600}
 #tip{position:absolute;left:64px;right:64px;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);text-align:center;color:#fff;text-shadow:0 1px 8px rgba(20,50,120,.5);font:400 13px/1.4 var(--f);letter-spacing:.04em;transition:opacity 2.5s;pointer-events:none}
 #hud{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:max(12px,env(safe-area-inset-right,0px));display:flex;gap:8px}
-.hb{width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.75);background:rgba(40,80,160,.28);color:#fff;font:400 19px/1 var(--f);cursor:pointer;padding:0;position:relative}
-.hb.on{background:rgba(255,255,255,.35);border-color:#fff}
-#mic.live{background:#9fe8c8;border-color:#9fe8c8}
+.hb{width:44px;height:44px;border-radius:50%;border:0;background:rgba(40,80,160,.28);color:#fff;font:400 19px/1 var(--f);cursor:pointer;padding:0;position:relative}
+.hb.on{background:rgba(255,255,255,.35)}
+#mic.live{background:#9fe8c8}
 #mic.off::after{content:"";position:absolute;left:9px;right:9px;top:50%;height:2px;background:#fff;transform:rotate(-40deg);box-shadow:0 0 0 1px rgba(40,80,160,.5)}
-#seats{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:max(14px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:7px;height:40px;padding:0 14px;border-radius:20px;background:rgba(40,80,160,.28);border:1px solid rgba(255,255,255,.5);color:#fff;font:600 13px var(--f);letter-spacing:.06em}
-#seats i{width:13px;height:13px;border-radius:50%;border:1.5px solid rgba(255,255,255,.8);box-sizing:border-box}
+#seats{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:max(14px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:7px;height:40px;padding:0 14px;border-radius:20px;background:rgba(40,80,160,.28);border:0;color:#fff;font:600 13px var(--f);letter-spacing:.06em}
+#seats i{width:13px;height:13px;border-radius:50%;background:rgba(255,255,255,.3)}
 #seats b{margin-left:4px;font-weight:600}
 #title{position:absolute;top:calc(env(safe-area-inset-top,0px) + 24px);left:0;right:0;text-align:center;color:#fff;font:200 15px var(--f);letter-spacing:.5em;padding-left:.5em;opacity:.85;pointer-events:none;text-shadow:0 1px 8px rgba(20,50,120,.4)}
 #chat{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 18px);width:min(520px,calc(100% - 32px));display:flex;gap:8px}
@@ -60,7 +60,6 @@ html,body{height:100%;margin:0;background:#8fb4e6;overflow:hidden;overscroll-beh
   <canvas id="c" role="img" aria-label="A mirror floor under a bright blue sky, a ring of 42 frames, and up to four glowing orbs"></canvas>
   <div id="intro">
     <div>
-      <h1>BLUE42</h1>
       <p>together · up to four orbs</p>
       <p>fly, talk, and type in the sky and its mirror</p>
       <div class="acts">
@@ -73,8 +72,7 @@ html,body{height:100%;margin:0;background:#8fb4e6;overflow:hidden;overscroll-beh
       <p class="small">same link = same room · press I for how it works</p>
     </div>
   </div>
-  <div id="title" hidden>BLUE42</div>
-  <div id="seats" class="ui" hidden aria-label="Who is here"><i></i><i></i><i></i><i></i><b id="count">1 / 4</b></div>
+  <div id="seats" class="ui" hidden aria-label="Who is here"><i></i><i></i><i></i><i></i><b id="count" hidden></b></div>
   <div id="hud" class="ui" hidden>
     <button id="mic" class="hb off" type="button" aria-label="Microphone (M)">🎙️</button>
     <button id="talk" class="hb" type="button" aria-label="Type a message (Enter)">💬</button>
@@ -232,8 +230,8 @@ function placeAvatar(A, p, dt) {
   const bob = MOT ? Math.sin(time * 2.1 + A.ph) * .25 : 0, k = SCALE.orb;
   A.sp.position.set(p.x, p.y + bob, p.z); A.sp.scale.setScalar(3.2 * k * (1 + A.level * .12));
   A.halo.position.copy(A.sp.position); A.halo.scale.setScalar(3.2 * k * (1.5 + A.level * 1.6)); A.halo.material.opacity = Math.min(1, A.level * 2.2);
-  if (A.label) { A.label.position.set(p.x, p.y + 2.7 * k, p.z); const s = A.label.userData, near = clamp(camera.position.distanceTo(p) / 30, .3, 1); A.label.scale.set(s.w * s.k * SCALE.label * near, s.h * s.k * SCALE.label * near, 1); A.label.material.opacity = clamp(1.6 - camera.position.distanceTo(p) / (220 * SCALE.label), .25, 1); }
-  if (A.bubble) { A.bubble.position.set(p.x, p.y + (A.mine ? 2.3 : 4.2) * k, p.z); const s = A.bubble.userData; A.bubble.scale.set(s.w * s.k * SCALE.label, s.h * s.k * SCALE.label, 1); }
+  if (A.label) { A.label.position.set(p.x, p.y + (A.bubble ? 3.2 : 2.4) * k, p.z); const s = A.label.userData, near = clamp(camera.position.distanceTo(p) / 30, .3, 1); A.label.scale.set(s.w * s.k * SCALE.label * near, s.h * s.k * SCALE.label * near, 1); A.label.material.opacity = clamp(1.6 - camera.position.distanceTo(p) / (220 * SCALE.label), .25, 1); }
+  if (A.bubble) { A.bubble.position.set(p.x, p.y + 2.05 * k, p.z); const s = A.bubble.userData; A.bubble.scale.set(s.w * s.k * SCALE.label, s.h * s.k * SCALE.label, 1); }
 }
 
 /* ---------- ripples on the mirror when you skim it ---------- */
@@ -346,7 +344,7 @@ function connect() {
 function other(id) { let A = OTHERS.get(id); if (!A) { A = makeAvatar(0); A.sp.visible = false; OTHERS.set(id, A); } return A; }
 function seatsUI() {
   const dots = $('seats').querySelectorAll('i'), taken = usedSeats(); if (mySeat >= 0) taken.add(mySeat);
-  dots.forEach((d, i) => { d.style.background = taken.has(i) ? SEATS[i].css : 'transparent'; d.style.borderColor = taken.has(i) ? SEATS[i].css : 'rgba(255,255,255,.8)'; });
+  dots.forEach((d, i) => { d.style.background = taken.has(i) ? SEATS[i].css : 'rgba(255,255,255,.3)'; });
   $('count').textContent = taken.size + ' / ' + MAX;
 }
 let lastSend = 0;
@@ -414,11 +412,11 @@ function note(A, what) { const log = $('log'), d = document.createElement('div')
 
 /* ---------- intro, HUD, keys ---------- */
 try { $('name').value = localStorage.getItem('blue42.together.name') || ''; } catch (e) {}
-function showIntro() { started = false; $('intro').hidden = false; for (const id of ['hud', 'seats', 'title', 'chat', 'keys']) $(id).hidden = true; $('full').hidden = !roomFull; $('go').hidden = roomFull; }
+function showIntro() { started = false; $('intro').hidden = false; for (const id of ['hud', 'seats', 'chat', 'keys']) $(id).hidden = true; $('full').hidden = !roomFull; $('go').hidden = roomFull; }
 function begin() {
   if (started || roomFull) return; started = true; beganAt = time; joinedAt = Date.now(); startAudio();
   myName = clean($('name').value, 18); try { localStorage.setItem('blue42.together.name', myName); } catch (e) {}
-  $('intro').hidden = true; for (const id of ['hud', 'seats', 'title']) $(id).hidden = false;
+  $('intro').hidden = true; for (const id of ['hud', 'seats']) $(id).hidden = false;
   seatsUI();
   if (!room) connect();
   tip('press I for how it works · 🔗 to invite', 6000);
