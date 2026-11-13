@@ -302,9 +302,9 @@ function listen() {
 const CODE_RE = /^[a-z0-9-]{3,32}$/;
 function newCode() { const w = ['sky', 'blue', 'orb', 'mirror', 'cloud', 'halo', 'drift', 'glass']; return w[Math.floor(Math.random() * w.length)] + '-' + Math.random().toString(36).slice(2, 6); }
 let CODE = (location.hash || '').slice(1).toLowerCase();
-if (!CODE_RE.test(CODE)) { CODE = newCode(); try { history.replaceState(null, '', '#' + CODE); } catch (e) { location.hash = CODE; } }
+if (!CODE_RE.test(CODE)) CODE = 'lobby';   // the plain link is one shared room, so a pasted link without a code still brings everyone together
 $('rc').textContent = CODE;
-addEventListener('hashchange', () => { const h = (location.hash || '').slice(1).toLowerCase(); if (h !== CODE && CODE_RE.test(h)) location.reload(); });
+addEventListener('hashchange', () => { const h = (location.hash || '').slice(1).toLowerCase() || 'lobby'; if (h !== CODE && CODE_RE.test(h)) location.reload(); });
 function freshRoom() { location.hash = newCode(); location.reload(); }
 
 let room = null, selfId = '', mySeat = -1, myName = '', netOK = false, roomFull = false;
@@ -526,7 +526,7 @@ function begin() {
   $('intro').hidden = true; for (const id of ['hud', 'seats']) $(id).hidden = false;
   seatsUI();
   if (!room) connect();
-  tip('press I for how it works · 🔗 to invite', 6000);
+  tip((CODE === 'lobby' ? 'you are in the lobby' : 'room ' + CODE) + ' · looking for others… · press I for help', 6000);
 }
 $('go').addEventListener('click', begin);
 $('name').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); begin(); } e.stopPropagation(); });
@@ -539,7 +539,7 @@ $('cam').addEventListener('click', toggleCam);
 $('talk').addEventListener('click', openChat);
 $('view').addEventListener('click', toggleView);
 $('invite').addEventListener('click', async () => {
-  const url = location.href; let ok = false; try { await navigator.clipboard.writeText(url); ok = true; } catch (e) {}
+  const url = location.origin + location.pathname + (CODE === 'lobby' ? '' : '#' + CODE); let ok = false; try { await navigator.clipboard.writeText(url); ok = true; } catch (e) {}
   tip(ok ? 'invite link copied · send it to up to three people' : url, ok ? 3500 : 9000);
 });
 function toggleView() { view = view === 'follow' ? 'above' : 'follow'; $('view').classList.toggle('on', view === 'above'); }
