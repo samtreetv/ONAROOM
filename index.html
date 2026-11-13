@@ -78,12 +78,13 @@ html,body{height:100%;margin:0;background:#8fb4e6;overflow:hidden;overscroll-beh
   <div id="hud" class="ui" hidden>
     <button id="mic" class="hb off" type="button" aria-label="Microphone (M)">🎙️</button>
     <button id="talk" class="hb" type="button" aria-label="Type a message (Enter)">💬</button>
+    <button id="clr" class="hb" type="button" aria-label="Clear the words over your head (X)" hidden>🧹</button>
     <button id="invite" class="hb" type="button" aria-label="Copy invite link">🔗</button>
     <button id="view" class="hb" type="button" aria-label="View from above (V)">◎</button>
     <button id="info" class="hb" type="button" aria-label="How it works (I)">i</button>
   </div>
   <div id="log" aria-live="polite"></div>
-  <form id="chat" hidden autocomplete="off"><input id="say" maxlength="80" placeholder="say something · Enter to send" aria-label="Say something"><button type="submit" aria-label="Send">↵</button></form>
+  <form id="chat" hidden autocomplete="off"><input id="say" maxlength="80" placeholder="over your head · stays till you change it · empty clears" aria-label="Say something"><button type="submit" aria-label="Send">↵</button></form>
   <div id="keys" class="ui" hidden role="dialog" aria-label="How it works">
     <button class="hb kx" id="kx" type="button" aria-label="Close">✕</button>
     <h2>HOW IT WORKS</h2>
@@ -103,7 +104,8 @@ html,body{height:100%;margin:0;background:#8fb4e6;overflow:hidden;overscroll-beh
         <div class="kg"><span><kbd>T</kbd></span><em>hold to talk while your mic is off</em></div>
         <div class="kg"><span>🔊</span><em>voices are louder close up, softer far away</em></div>
         <div class="kg"><span>⭕</span><em>in the circle in the middle, everyone hears everyone</em></div>
-        <div class="kg"><span><kbd>Enter</kbd> 💬</span><em>type a message · it floats over your orb</em></div>
+        <div class="kg"><span><kbd>Enter</kbd> 💬</span><em>words over your head · they stay until you say something new</em></div>
+        <div class="kg"><span><kbd>X</kbd> 🧹</span><em>clear the words over your head · or send nothing</em></div>
         <div class="kg"><span>💫</span><em>a glow around an orb means they're talking</em></div>
       </section>
       <section><h3>👥 Room</h3>
@@ -207,10 +209,10 @@ const ORBTEX = SEATS.map(orbTex);
 const HALO = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d'), g = x.createRadialGradient(64, 64, 0, 64, 64, 64);
   [[0, 0], [.42, 0], [.5, .55], [.62, .3], [1, 0]].forEach(([o, a]) => g.addColorStop(o, 'rgba(255,255,255,' + a + ')')); x.fillStyle = g; x.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c); })();
 function textSprite(txt, o) {
-  o = Object.assign({ size: 30, bg: null, fg: '#ffffff', pad: 16, k: .014 }, o); const c = document.createElement('canvas'), x = c.getContext('2d'), font = '500 ' + o.size + 'px Helvetica Neue, Helvetica, Arial, sans-serif';
+  o = Object.assign({ size: 30, bg: null, fg: '#ffffff', pad: 16, k: .014, w: 500 }, o); const c = document.createElement('canvas'), x = c.getContext('2d'), font = o.w + ' ' + o.size + 'px Helvetica Neue, Helvetica, Arial, sans-serif';
   x.font = font; c.width = Math.max(32, Math.ceil(x.measureText(txt).width) + o.pad * 2); c.height = Math.ceil(o.size + o.pad * 1.4);
   x.font = font; x.textAlign = 'center'; x.textBaseline = 'middle';
-  if (o.bg) { x.fillStyle = o.bg; const r = c.height / 2; x.beginPath(); x.roundRect ? x.roundRect(0, 0, c.width, c.height, r) : x.rect(0, 0, c.width, c.height); x.fill(); } else { x.shadowColor = 'rgba(20,50,120,.7)'; x.shadowBlur = 8; }
+  if (o.bg) { x.fillStyle = o.bg; const r = c.height / 2; x.beginPath(); x.roundRect ? x.roundRect(0, 0, c.width, c.height, r) : x.rect(0, 0, c.width, c.height); x.fill(); } else if (o.rs) { x.shadowColor = '#000'; x.shadowBlur = 0; x.shadowOffsetX = 3; x.shadowOffsetY = 3; } else { x.shadowColor = 'rgba(20,50,120,.7)'; x.shadowBlur = 8; }
   x.fillStyle = o.fg; x.fillText(txt, c.width / 2, c.height / 2 + 1);
   const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false })); sp.scale.set(c.width * o.k, c.height * o.k, 1); sp.userData.txt = txt; sp.userData.k = o.k; sp.userData.w = c.width; sp.userData.h = c.height; return sp;
 }
@@ -223,7 +225,7 @@ function makeAvatar(seat) {
 }
 function setSeat(A, seat) { if (A.seat === seat) return; A.seat = seat; A.sp.material.map = ORBTEX[seat]; A.sp.material.needsUpdate = true; const t = TWINS.find(p => p[0] === A.sp); if (t) { t[1].material.map = ORBTEX[seat]; t[1].material.needsUpdate = true; } A.halo.material.color.set(SEATS[seat].css); A.name = '\u0000'; }
 function setLabel(A, name) { if (A.mine) { A.name = name; return; } if (A.name === name) return; A.name = name; dropSprite(A.label); A.label = textSprite(name || SEATS[A.seat].n, { size: 30, k: .016 }); scene.add(A.label); }
-function setBubble(A, msg) { const cur = A.bubble && A.bubble.userData.txt; if (cur === msg) return; dropSprite(A.bubble); A.bubble = null; if (msg) { A.bubble = textSprite(msg, { size: 30, bg: 'rgba(255,255,255,.95)', fg: '#2a5bb8', k: .013 }); scene.add(A.bubble); } }
+function setBubble(A, msg) { const cur = A.bubble && A.bubble.userData.txt; if (cur === msg) return; dropSprite(A.bubble); A.bubble = null; if (msg) { A.bubble = textSprite(msg, { size: 34, fg: '#ffff00', rs: true, w: 700, pad: 10, k: .013 }); scene.add(A.bubble); } }
 function removeAvatar(A) { scene.remove(A.sp); unTwin(A.sp); scene.remove(A.halo); dropSprite(A.label); dropSprite(A.bubble); }
 const SCALE = { label: 1, orb: 1 };
 function placeAvatar(A, p, dt) {
@@ -231,8 +233,7 @@ function placeAvatar(A, p, dt) {
   A.sp.position.set(p.x, p.y + bob, p.z); A.sp.scale.setScalar(3.2 * k * (1 + A.level * .12));
   A.halo.position.copy(A.sp.position); A.halo.scale.setScalar(3.2 * k * (1.5 + A.level * 1.6)); A.halo.material.opacity = Math.min(1, A.level * 2.2);
   if (A.label) { A.label.position.set(p.x, p.y + 2.7 * k, p.z); const s = A.label.userData, near = clamp(camera.position.distanceTo(p) / 30, .3, 1); A.label.scale.set(s.w * s.k * SCALE.label * near, s.h * s.k * SCALE.label * near, 1); A.label.material.opacity = clamp(1.6 - camera.position.distanceTo(p) / (220 * SCALE.label), .25, 1); }
-  if (A.bubble) { A.bubble.position.set(p.x, p.y + 4.4 * k, p.z); const s = A.bubble.userData; A.bubble.scale.set(s.w * s.k * SCALE.label, s.h * s.k * SCALE.label, 1); }
-  if (A.msg && Date.now() - A.msgT > 8000) { A.msg = ''; setBubble(A, ''); }
+  if (A.bubble) { A.bubble.position.set(p.x, p.y + (A.mine ? 2.3 : 4.2) * k, p.z); const s = A.bubble.userData; A.bubble.scale.set(s.w * s.k * SCALE.label, s.h * s.k * SCALE.label, 1); }
 }
 
 /* ---------- ripples on the mirror when you skim it ---------- */
@@ -300,7 +301,7 @@ const OTHERS = new Map();   // peerId -> avatar
 let A_hi, A_pos, A_say;
 const clean = (s, n) => String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f\u200b-\u200f\u2028-\u202e\u2060-\u206f]/g, '').trim().slice(0, n);
 let joinedAt = 0;
-const hiMsg = () => ({ n: myName, s: mySeat, t: joinedAt });
+const hiMsg = () => ({ n: myName, s: mySeat, t: joinedAt, m: me.msg || '' });
 function usedSeats() { const u = new Set(); for (const [, A] of OTHERS) if (A.have && A.seat >= 0) u.add(A.seat); return u; }
 function pickSeat() { const u = usedSeats(); for (let i = 0; i < MAX; i++) if (!u.has(i)) return i; return 0; }
 function takeSeat(s, spawn) {
@@ -324,6 +325,7 @@ function connect() {
     if (!d || typeof d !== 'object') return; const A = other(peerId), seat = Number.isInteger(d.s) && d.s >= 0 && d.s < MAX ? d.s : -1, name = clean(d.n, 18);
     const first = !A.have; A.have = seat >= 0; if (seat >= 0) setSeat(A, seat); setLabel(A, name || (seat >= 0 ? SEATS[seat].n : ''));
     if (first && A.have) note(A, 'floated in');
+    { const m = clean(d.m, 80); if (m !== A.msg) { A.msg = m; setBubble(A, m); } }
     // two people on one seat: the later id moves over
     A.t = Number.isFinite(d.t) ? d.t : 0;
     if (seat >= 0 && seat === mySeat && (joinedAt > A.t || (joinedAt === A.t && selfId > peerId))) takeSeat(pickSeat(), time - beganAt < 10);   // whoever came first keeps the seat
@@ -333,7 +335,7 @@ function connect() {
     if (!Array.isArray(d) || d.length < 4 || !d.every(Number.isFinite)) return; const A = other(peerId);
     A.target.set(clamp(d[0], -3000, 3000), clamp(d[1], 1, 900), clamp(d[2], -3000, 3000)); if (!A.placed) { A.pos.copy(A.target); A.placed = true; }
   });
-  A_say.onMessage((d, { peerId }) => { const A = other(peerId), m = clean(d, 80); if (!m) return; A.msg = m; A.msgT = Date.now(); setBubble(A, m); logLine(A, m); });
+  A_say.onMessage((d, { peerId }) => { const A = other(peerId), m = clean(d, 80); A.msg = m; setBubble(A, m); if (m) logLine(A, m); });
   room.onPeerStream((stream, { peerId }) => attachVoice(other(peerId), stream));
   room.onError(e => {
     if (e && e.code === 'room-full' && !Object.keys(room.getPeers()).length) { roomFull = true; try { room.leave(); } catch (x) {} room = null; showIntro(); }
@@ -397,10 +399,12 @@ function voiceGain(A) { if (inCommons(pos) && inCommons(A.pos)) return 1; const 
 function openChat() { if (!started) return; $('chat').hidden = false; $('say').focus(); }
 function closeChat() { $('chat').hidden = true; $('say').blur(); }
 $('chat').addEventListener('submit', e => {
-  e.preventDefault(); const m = clean($('say').value, 80); $('say').value = ''; closeChat(); if (!m) return;
-  me.msg = m; me.msgT = Date.now(); setBubble(me, m); logLine(me, m); if (A_say) A_say.send(m).catch(() => {});
+  e.preventDefault(); const m = clean($('say').value, 80); $('say').value = ''; closeChat(); if (!m && !me.msg) return;
+  setOverhead(m);
 });
 $('say').addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); closeChat(); } e.stopPropagation(); });
+function setOverhead(m) { me.msg = m; setBubble(me, m); if (m) logLine(me, m); else tip('cleared', 1200); if (A_say) A_say.send(m).catch(() => {}); $('clr').hidden = !m; }
+$('clr').addEventListener('click', () => setOverhead(''));
 function logLine(A, text) {
   const log = $('log'), d = document.createElement('div'), b = document.createElement('b'); b.style.color = SEATS[Math.max(0, A.seat)].css; b.textContent = (A.mine ? (myName || 'you') : (A.name || SEATS[Math.max(0, A.seat)].n)) + '  ';
   d.appendChild(b); d.appendChild(document.createTextNode(text)); log.appendChild(d); while (log.children.length > 6) log.removeChild(log.firstChild);
@@ -452,11 +456,12 @@ addEventListener('keydown', e => {
   if (!started) { if (k === 'i') toggleKeys(); return; }
   if (k === 'enter') { e.preventDefault(); openChat(); return; }
   if (k === 'escape') { toggleKeys(false); return; }
-  if (e.repeat && 'imtvn'.includes(k)) return;
+  if (e.repeat && 'imtvnx'.includes(k)) return;
   if (k === 'i') { toggleKeys(); return; }
   if (k === 'm') { toggleMic(); return; }
   if (k === 'v') { toggleView(); return; }
   if (k === 'n') { freshRoom(); return; }
+  if (k === 'x') { if (me.msg) setOverhead(''); return; }
   if (k === 't') { ptt = true; if (!micStream) getMic(false).then(applyMic); else applyMic(); return; }
   keys.add(k); if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(k)) e.preventDefault();
 });
@@ -508,7 +513,6 @@ function frame(now) {
   PADM.forEach((m, i) => { m.material.opacity = (i === mySeat ? .75 : .4) + .1 * Math.sin(time * 1.2 + i); });
   // me
   me.level = lerp(me.level, TALKING() ? Math.min(1, level(myMeter) * 6) : 0, 1 - Math.exp(-dt * 12));
-  if (me.msg && Date.now() - me.msgT > 8000) { me.msg = ''; setBubble(me, ''); }
   placeAvatar(me, pos, dt);
   // everyone else
   for (const [, A] of OTHERS) {
