@@ -51,6 +51,12 @@ html,body{height:100%;margin:0;background:#8fb4e6;overflow:hidden;overscroll-beh
 #keys .kr{margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.85);font-size:13px;line-height:1.7}
 #keys .kx{position:absolute;top:12px;right:12px}
 #net{font-weight:600}
+#picks{display:flex;gap:16px;margin-bottom:6px}
+#picks button{width:48px;height:48px;border-radius:50%;border:0;padding:0;cursor:pointer;opacity:.55;transform:scale(.88);transition:transform .2s,opacity .2s,box-shadow .2s}
+#picks button[aria-checked="true"]{opacity:1;transform:scale(1.12);box-shadow:0 0 0 4px rgba(255,255,255,.55),0 0 24px rgba(255,255,255,.6)}
+#cam.live{background:#9fe8c8}
+.hb .n{position:absolute;right:-4px;top:-4px;min-width:20px;height:20px;border-radius:10px;background:#fff;color:#2a5bb8;font:700 11px/20px var(--f)}
+#selfv{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 18px);width:150px;height:112px;object-fit:cover;border-radius:26px;transform:scaleX(-1);-webkit-mask-image:radial-gradient(ellipse 72% 72% at 50% 50%,#000 55%,transparent 100%);mask-image:radial-gradient(ellipse 72% 72% at 50% 50%,#000 55%,transparent 100%);pointer-events:none}
 .hb:focus-visible,.pbtn:focus-visible,.lbtn:focus-visible{outline:2px solid #fff;outline-offset:3px}
 @media (prefers-reduced-motion:reduce){#tip{transition:none}}
 </style>
@@ -63,6 +69,7 @@ html,body{height:100%;margin:0;background:#8fb4e6;overflow:hidden;overscroll-beh
       <p>together · up to four orbs</p>
       <p>fly, talk, and type in the sky and its mirror</p>
       <div class="acts">
+        <div id="picks" role="radiogroup" aria-label="Pick your orb"><button type="button" data-s="2" aria-label="Green orb"></button><button type="button" data-s="3" aria-label="Yellow orb"></button><button type="button" data-s="1" aria-label="Red orb"></button><button type="button" data-s="0" aria-label="Blue orb"></button></div>
         <input id="name" maxlength="18" placeholder="your name" autocomplete="off" aria-label="Your name">
         <button class="pbtn" id="go" type="button">Float in</button>
         <button class="lbtn" id="fresh" type="button">make a new room</button>
@@ -75,6 +82,7 @@ html,body{height:100%;margin:0;background:#8fb4e6;overflow:hidden;overscroll-beh
   <div id="seats" class="ui" hidden aria-label="Who is here"><i></i><i></i><i></i><i></i><b id="count" hidden></b></div>
   <div id="hud" class="ui" hidden>
     <button id="mic" class="hb off" type="button" aria-label="Microphone (M)">🎙️</button>
+    <button id="cam" class="hb" type="button" aria-label="Camera (C)">🎥<span class="n" hidden></span></button>
     <button id="talk" class="hb" type="button" aria-label="Type a message (Enter)">💬</button>
     <button id="clr" class="hb" type="button" aria-label="Clear the words over your head (X)" hidden>🧹</button>
     <button id="invite" class="hb" type="button" aria-label="Copy invite link">🔗</button>
@@ -100,6 +108,9 @@ html,body{height:100%;margin:0;background:#8fb4e6;overflow:hidden;overscroll-beh
       <section><h3>🎙️ Talk</h3>
         <div class="kg"><span><kbd>M</kbd> 🎙️</span><em>mic on / off · the first time, your browser asks</em></div>
         <div class="kg"><span><kbd>T</kbd></span><em>hold to talk while your mic is off</em></div>
+        <div class="kg"><span><kbd>C</kbd> 🎥</span><em>camera on / off · a ring spins around your orb</em></div>
+        <div class="kg"><span>👆👆</span><em>double-click an orb with a ring to see their camera · again or Esc to close</em></div>
+        <div class="kg"><span>👀</span><em>the number on 🎥 is how many are watching you</em></div>
         <div class="kg"><span>🔊</span><em>voices are louder close up, softer far away</em></div>
         <div class="kg"><span>⭕</span><em>in the circle in the middle, everyone hears everyone</em></div>
         <div class="kg"><span><kbd>Enter</kbd> 💬</span><em>words over your head · they stay until you say something new</em></div>
@@ -108,7 +119,7 @@ html,body{height:100%;margin:0;background:#8fb4e6;overflow:hidden;overscroll-beh
       </section>
       <section><h3>👥 Room</h3>
         <div class="kg"><span>🔗</span><em>copy the invite link · same link = same room</em></div>
-        <div class="kg"><span>● ● ● ●</span><em>four seats · blue · rose · mint · gold</em></div>
+        <div class="kg"><span>● ● ● ●</span><em>pick blue, red, green or yellow when you join</em></div>
         <div class="kg"><span><kbd>N</kbd></span><em>make a new, empty room</em></div>
         <div class="kg"><span><kbd>I</kbd></span><em>these instructions</em></div>
         <div class="kg"><span><kbd>Esc</kbd></span><em>close</em></div>
@@ -116,6 +127,7 @@ html,body{height:100%;margin:0;background:#8fb4e6;overflow:hidden;overscroll-beh
     </div>
     <div class="kr">no server · your browser talks straight to theirs · nothing is recorded or saved<br>use headphones so your mic doesn't hear the others · some work and school networks block the connection</div>
   </div>
+  <video id="selfv" muted playsinline autoplay hidden></video>
   <div id="tip" aria-live="polite"></div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -142,9 +154,10 @@ const MIRROR_TINT = new THREE.Color('#c9d8f0');
 // the four seats: Sam's blue first
 const SEATS = [
   { n: 'blue', css: '#4f8cff', glow: '80,150,255', g: ['#6fb4ff', '#2c62d8', '#1d3fa8', '#9fe0ff'] },
-  { n: 'rose', css: '#ff6fa3', glow: '255,120,170', g: ['#ffb3cf', '#e2457f', '#a8285a', '#ffd6e6'] },
-  { n: 'mint', css: '#3fd6a0', glow: '90,220,170', g: ['#a6f5d6', '#22b07e', '#127a56', '#d4fff0'] },
-  { n: 'gold', css: '#ffb347', glow: '255,180,80', g: ['#ffd9a0', '#e8902a', '#b0601a', '#fff0c8'] }];
+  { n: 'red', css: '#ff5a52', glow: '255,90,90', g: ['#ffb0a8', '#e8443a', '#a82a22', '#ffd8d2'] },
+  { n: 'green', css: '#3fd66a', glow: '90,220,120', g: ['#b0f5c0', '#2fbf5a', '#1a8a3c', '#d8ffe0'] },
+  { n: 'yellow', css: '#ffd23f', glow: '255,215,70', g: ['#fff0a0', '#f0c020', '#b08a10', '#fff8d0'] }];
+const DOT = ['🔵', '🔴', '🟢', '🟡'];
 const PADS = [0, 1, 2, 3].map(i => { const a = i / 4 * TAU; return new V3(Math.sin(a) * PAD_R, 0, -Math.cos(a) * PAD_R); });
 
 /* ---------- renderer, scene, sky (BLUE42's mirror sky) ---------- */
@@ -296,13 +309,14 @@ function freshRoom() { location.hash = newCode(); location.reload(); }
 
 let room = null, selfId = '', mySeat = -1, myName = '', netOK = false, roomFull = false;
 const OTHERS = new Map();   // peerId -> avatar
-let A_hi, A_pos, A_say;
+let A_hi, A_pos, A_say, A_cam, A_want;
 const clean = (s, n) => String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f\u200b-\u200f\u2028-\u202e\u2060-\u206f]/g, '').trim().slice(0, n);
 let joinedAt = 0;
-const hiMsg = () => ({ n: myName, s: mySeat, t: joinedAt, m: me.msg || '' });
+const hiMsg = () => ({ n: myName, s: mySeat, t: joinedAt, m: me.msg || '', c: camStream ? 1 : 0 });
 function usedSeats() { const u = new Set(); for (const [, A] of OTHERS) if (A.have && A.seat >= 0) u.add(A.seat); return u; }
-function pickSeat() { const u = usedSeats(); for (let i = 0; i < MAX; i++) if (!u.has(i)) return i; return 0; }
+function pickSeat() { const u = usedSeats(); if (!u.has(prefSeat)) return prefSeat; for (let i = 0; i < MAX; i++) if (!u.has(i)) return i; return 0; }
 function takeSeat(s, spawn) {
+  if (s !== prefSeat && mySeat !== s) tip(DOT[prefSeat] + ' was taken · you are ' + DOT[s], 4000);
   mySeat = s; setSeat(me, s); setLabel(me, myName || SEATS[s].n);
   if (spawn) { pos.set(PADS[s].x * .95, 3.2, PADS[s].z * .95); mv.yaw = Math.atan2(-PADS[s].x, PADS[s].z); camera.position.set(pos.x - Math.sin(mv.yaw) * 14, 7.6, pos.z + Math.cos(mv.yaw) * 14); }
   if (A_hi) A_hi.send(hiMsg()).catch(() => {}); seatsUI();
@@ -311,19 +325,22 @@ function connect() {
   if (!window.Trystero || !window.RTCPeerConnection) { $('net').textContent = 'This copy is offline: open it from its GitHub link to fly together.'; return; }
   try { const cfg = { appId: APP, maxUsers: MAX, identity: 'none' }; if (Array.isArray(window.__RELAYS)) cfg.relayConfig = { urls: window.__RELAYS }; room = Trystero.joinRoom(cfg, CODE); } catch (e) { room = null; $('net').textContent = 'Could not reach the sky network. Flying solo.'; return; }
   netOK = true;
-  A_hi = room.makeAction('hi'); A_pos = room.makeAction('pos'); A_say = room.makeAction('say');
+  A_hi = room.makeAction('hi'); A_pos = room.makeAction('pos'); A_say = room.makeAction('say'); A_cam = room.makeAction('cam'); A_want = room.makeAction('want');
+  A_cam.onMessage((d, { peerId }) => setCamFlag(other(peerId), d === true));
+  A_want.onMessage((d, { peerId }) => { if (d === true) { if (camStream && OTHERS.has(peerId)) { WATCH.add(peerId); room.addStream(camStream, { target: peerId, metadata: { kind: 'cam' } }).catch(() => {}); } } else { WATCH.delete(peerId); if (camStream) try { room.removeStream(camStream, { target: peerId }); } catch (e) {} } camBadge(); });
   room.getSelf().then(s => { selfId = s.peerId; }).catch(() => {});
   room.onPeerJoin(({ peerId }) => {
     other(peerId);
     if (mySeat >= 0) A_hi.send(hiMsg(), { target: peerId }).catch(() => {});
-    if (micStream) room.addStream(micStream, { target: peerId }).catch(() => {});
+    if (micStream) room.addStream(micStream, { target: peerId, metadata: { kind: 'mic' } }).catch(() => {});
   });
-  room.onPeerLeave(({ peerId }) => { const A = OTHERS.get(peerId); if (!A) return; if (A.have) note(A, 'floated off'); removeAvatar(A); if (A.v) { try { A.v.g.disconnect(); A.v.pan.disconnect(); } catch (e) {} } if (A.el) { A.el.srcObject = null; } OTHERS.delete(peerId); seatsUI(); });
+  room.onPeerLeave(({ peerId }) => { WATCH.delete(peerId); camBadge(); const A = OTHERS.get(peerId); if (!A) return; if (VIEW && VIEW.A === A) closeView(true); if (A.ring) scene.remove(A.ring); if (A.have) note(A, 'floated off'); removeAvatar(A); if (A.v) { try { A.v.g.disconnect(); A.v.pan.disconnect(); } catch (e) {} } if (A.el) { A.el.srcObject = null; } OTHERS.delete(peerId); seatsUI(); });
   A_hi.onMessage((d, { peerId }) => {
     if (!d || typeof d !== 'object') return; const A = other(peerId), seat = Number.isInteger(d.s) && d.s >= 0 && d.s < MAX ? d.s : -1, name = clean(d.n, 18);
     const first = !A.have; A.have = seat >= 0; if (seat >= 0) setSeat(A, seat); setLabel(A, name || (seat >= 0 ? SEATS[seat].n : ''));
     if (first && A.have) note(A, 'floated in');
     { const m = clean(d.m, 80); if (m !== A.msg) { A.msg = m; setBubble(A, m); } }
+    setCamFlag(A, d.c === 1);
     // two people on one seat: the later id moves over
     A.t = Number.isFinite(d.t) ? d.t : 0;
     if (seat >= 0 && seat === mySeat && (joinedAt > A.t || (joinedAt === A.t && selfId > peerId))) takeSeat(pickSeat(), time - beganAt < 10);   // whoever came first keeps the seat
@@ -334,14 +351,14 @@ function connect() {
     A.target.set(clamp(d[0], -3000, 3000), clamp(d[1], 1, 900), clamp(d[2], -3000, 3000)); if (!A.placed) { A.pos.copy(A.target); A.placed = true; }
   });
   A_say.onMessage((d, { peerId }) => { const A = other(peerId), m = clean(d, 80); A.msg = m; setBubble(A, m); if (m) logLine(A, m); });
-  room.onPeerStream((stream, { peerId }) => attachVoice(other(peerId), stream));
+  room.onPeerStream((stream, { peerId, metadata }) => { const A = other(peerId); if ((metadata && metadata.kind === 'cam') || (stream.getVideoTracks().length && !stream.getAudioTracks().length)) camArrive(A, stream); else attachVoice(A, stream); });
   room.onError(e => {
     if (e && e.code === 'room-full' && !Object.keys(room.getPeers()).length) { roomFull = true; try { room.leave(); } catch (x) {} room = null; showIntro(); }
   });
   // nobody answered: the first seat is yours
   setTimeout(() => { if (mySeat < 0) takeSeat(pickSeat(), true); }, 1600);
 }
-function other(id) { let A = OTHERS.get(id); if (!A) { A = makeAvatar(0); A.sp.visible = false; OTHERS.set(id, A); } return A; }
+function other(id) { let A = OTHERS.get(id); if (!A) { A = makeAvatar(0); A.id = id; A.sp.visible = false; OTHERS.set(id, A); } return A; }
 function seatsUI() {
   const dots = $('seats').querySelectorAll('i'), taken = usedSeats(); if (mySeat >= 0) taken.add(mySeat);
   dots.forEach((d, i) => { d.style.background = taken.has(i) ? SEATS[i].css : 'rgba(255,255,255,.3)'; });
@@ -368,7 +385,7 @@ async function getMic(openAfter) {
   startAudio();
   if (ac) { try { const src = ac.createMediaStreamSource(micStream), an = ac.createAnalyser(); an.fftSize = 512; src.connect(an); myMeter = { an, buf: new Uint8Array(512) }; } catch (e) {} }
   micOpen = !!openAfter; applyMic();
-  if (room) room.addStream(micStream).catch(() => {});
+  if (room) room.addStream(micStream, { metadata: { kind: 'mic' } }).catch(() => {});
   tip(micOpen ? 'mic on · headphones help' : 'hold T to talk', 3500);
   return true;
 }
@@ -393,6 +410,91 @@ function level(m) { if (!m) return 0; m.an.getByteTimeDomainData(m.buf); let s =
 const inCommons = p => Math.hypot(p.x, p.z) < COMMONS;
 function voiceGain(A) { if (inCommons(pos) && inCommons(A.pos)) return 1; const d = pos.distanceTo(A.pos); return d < 50 ? 1 : clamp(1 - (d - 50) / 700, .12, 1); }
 
+/* ---------- camera: yours goes only to whoever double-clicks you; theirs opens out of their orb into BLUE42's soft-edge frame ---------- */
+let camStream = null, VIEW = null;
+const WATCH = new Set();
+function camBadge() { const n = $('cam').querySelector('.n'); n.hidden = !WATCH.size; n.textContent = '👀' + WATCH.size; }
+async function toggleCam() {
+  startAudio();
+  if (camStream) {
+    for (const id of WATCH) try { room && room.removeStream(camStream, { target: id }); } catch (e) {}
+    WATCH.clear(); camStream.getTracks().forEach(t => t.stop()); camStream = null; $('selfv').srcObject = null; $('selfv').hidden = true;
+    $('cam').classList.remove('live'); camBadge(); setCamFlag(me, false); if (A_cam) A_cam.send(false).catch(() => {}); tip('camera off', 1500); return;
+  }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { tip('this browser has no camera access here', 4000); return; }
+  try { camStream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }, audio: false }); }
+  catch (e) { tip('the camera was blocked · allow it from the address bar', 5000); return; }
+  $('selfv').srcObject = camStream; $('selfv').hidden = false; $('selfv').play().catch(() => {});
+  $('cam').classList.add('live'); setCamFlag(me, true); if (A_cam) A_cam.send(true).catch(() => {});
+  tip('camera on · people double-click your orb to see you', 3500);
+}
+// the ring: a thin dashed circle that spins around an orb whose camera is on
+const RINGTEX = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d'); x.strokeStyle = 'rgba(255,255,255,.95)'; x.lineWidth = 4; x.setLineDash([14, 10]); x.beginPath(); x.arc(64, 64, 56, 0, Math.PI * 2); x.stroke(); return new THREE.CanvasTexture(c); })();
+function setCamFlag(A, on) {
+  A.cam = on;
+  if (on && !A.ring) { A.ring = new THREE.Sprite(new THREE.SpriteMaterial({ map: RINGTEX, transparent: true, depthWrite: false, opacity: .85 })); scene.add(A.ring); }
+  if (!on && A.ring) { scene.remove(A.ring); A.ring = null; }
+  if (!on && VIEW && VIEW.A === A) closeView(true);
+}
+function ringFrame(A, dt) { if (!A.ring) return; A.ring.position.copy(A.sp.position); A.ring.scale.setScalar(A.sp.scale.x * 1.45); A.ring.material.rotation += dt * 1.2; A.ring.visible = A.sp.visible && !(VIEW && VIEW.A === A && VIEW.m > .2); }
+// BLUE42's player frame (soft edge: a little round, the edges fade out)
+const CARD_FS = 'uniform sampler2D map; uniform vec2 size; uniform vec2 hb; uniform float rad; uniform float fade; uniform vec3 tint; uniform float feather; uniform float warp; uniform vec2 crop; varying vec2 vUv;' +
+  'void main(){ vec2 p = (vUv - 0.5) * size; float ex = clamp(p.x / hb.x, -1.0, 1.0); float lim = hb.y * (1.0 + warp * 0.16 * (1.0 - ex * ex));' +
+  ' vec2 q = vec2(abs(p.x) - hb.x + rad, abs(p.y) - lim + rad); float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - rad; if (d > 0.0) discard;' +
+  ' vec2 uv = vec2(p.x / (2.0 * hb.x) + 0.5, p.y / (2.0 * lim) + 0.5); uv = (uv - 0.5) * crop + 0.5;' +
+  ' vec3 c = texture2D(map, uv).rgb * tint; c *= 1.0 + warp * 0.07 * (1.0 - ex * ex);' +
+  ' if (feather < 0.001) c = mix(c, vec3(1.0) * tint, smoothstep(-0.35, 0.0, d) * 0.35);' +
+  ' gl_FragColor = vec4(c, fade * (feather > 0.001 ? smoothstep(0.0, feather, -d) : 1.0)); }';
+const CARD_VS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }';
+function cardMat() { return new THREE.ShaderMaterial({ uniforms: { map: { value: null }, size: { value: new THREE.Vector2(1, 1) }, hb: { value: new THREE.Vector2(.5, .5) }, rad: { value: .5 }, fade: { value: 0 }, tint: { value: new THREE.Color('#ffffff') }, feather: { value: 0 }, warp: { value: 0 }, crop: { value: new THREE.Vector2(1, 1) } }, vertexShader: CARD_VS, fragmentShader: CARD_FS, transparent: true, depthWrite: false, side: THREE.DoubleSide, fog: false }); }
+const SOFT = { rad: 3, feather: .22 };
+function toggleWatch(A) {
+  if (VIEW && VIEW.A === A && VIEW.open) { closeView(); return; }
+  if (!A.cam) { tip((A.name || SEATS[A.seat].n) + "'s camera is off", 2500); return; }
+  if (VIEW) closeView();
+  VIEW = { A, open: true, m: 0, el: null, vt: null, card: null }; if (A_want) A_want.send(true, { target: A.id }).catch(() => {});
+  tip('opening ' + (A.name || SEATS[A.seat].n) + "'s camera · double-click again or Esc to close", 3500);
+}
+function closeView(quiet) { if (!VIEW || !VIEW.open) return; VIEW.open = false; if (!quiet && A_want && VIEW.A.id) A_want.send(false, { target: VIEW.A.id }).catch(() => {}); }
+function camArrive(A, stream) {
+  if (!VIEW || VIEW.A !== A || !VIEW.open) return;
+  const el = document.createElement('video'); el.muted = true; el.playsInline = true; el.setAttribute('playsinline', ''); el.autoplay = true; el.srcObject = stream; el.play().catch(() => {});
+  if (VIEW.vt) VIEW.vt.dispose(); VIEW.el = el; VIEW.vt = new THREE.VideoTexture(el); VIEW.vt.minFilter = THREE.LinearFilter;
+}
+const _cq = new V3(), _cw = new V3(), _cr = new V3(), _ct = new V3();
+function viewFrame(dt) {
+  if (!VIEW) return; const V = VIEW, ready = V.el && V.el.videoWidth > 0;
+  V.m = lerp(V.m, V.open && ready ? 1 : 0, 1 - Math.exp(-dt * 4));
+  if (!V.open && V.m < .01) { if (V.card) { scene.remove(V.card); V.card.material.dispose(); } if (V.vt) V.vt.dispose(); if (V.el) V.el.srcObject = null; VIEW = null; return; }
+  if (!ready) return;
+  if (!V.card) { V.card = new THREE.Mesh(PLANE, cardMat()); V.card.renderOrder = 20; V.card.material.depthTest = false; scene.add(V.card); }
+  const U = V.card.material.uniforms; U.map.value = V.vt;
+  _cq.set(0, 0, -1).applyQuaternion(camera.quaternion); _cw.set(0, 1, 0).applyQuaternion(camera.quaternion);
+  const a = V.el.videoWidth / V.el.videoHeight, Dd = 28, th = Math.tan(camera.fov * Math.PI / 360), vh = 2 * Dd * th, vw = vh * camera.aspect;
+  let w = vw * .78, h = w / a; if (h > vh * .46) { h = vh * .46; w = h * a; }
+  const m = sm(0, 1, V.m), o = V.A.sp.scale.x * .8;
+  _ct.copy(camera.position).addScaledVector(_cq, Dd).addScaledVector(_cw, vh * .2);
+  V.card.position.lerpVectors(V.A.sp.position, _ct, m); V.card.quaternion.copy(camera.quaternion);
+  const sw = lerp(o, w, m), shh = lerp(o, h, m); V.card.scale.set(sw, shh, 1);
+  U.size.value.set(sw, shh); U.hb.value.set(sw / 2, shh / 2); U.rad.value = lerp(Math.min(sw, shh) / 2, SOFT.rad, m); U.feather.value = SOFT.feather; U.fade.value = Math.min(1, V.m * 1.6);
+  V.rect = { w, h, c: _ct.clone() };
+}
+// double-click (or double-tap): which orb is under the finger?
+const _sp = new V3();
+function orbAt(cx, cy) {
+  const r = cv.getBoundingClientRect(); let best = null, bd = 1e9;
+  for (const [, A] of OTHERS) { if (!A.sp.visible) continue; _sp.copy(A.sp.position).project(camera); if (_sp.z > 1) continue;
+    const x = (_sp.x * .5 + .5) * r.width + r.left, y = (-_sp.y * .5 + .5) * r.height + r.top, d = Math.hypot(x - cx, y - cy);
+    const rad = Math.max(34, A.sp.scale.x / (2 * camera.position.distanceTo(A.sp.position) * Math.tan(camera.fov * Math.PI / 360)) * r.height * .6);
+    if (d < rad && d < bd) { bd = d; best = A; } }
+  return best;
+}
+function onView(cx, cy) {   // a double-tap on the open frame closes it
+  if (!VIEW || !VIEW.open || !VIEW.rect || VIEW.m < .5) return false; const r = cv.getBoundingClientRect(); _sp.copy(VIEW.rect.c).project(camera);
+  const x = (_sp.x * .5 + .5) * r.width + r.left, y = (-_sp.y * .5 + .5) * r.height + r.top, th = Math.tan(camera.fov * Math.PI / 360), k = r.height / (2 * 28 * th);
+  return Math.abs(cx - x) < VIEW.rect.w * k / 2 && Math.abs(cy - y) < VIEW.rect.h * k / 2;
+}
+
 /* ---------- chat ---------- */
 function openChat() { if (!started) return; $('chat').hidden = false; $('say').focus(); }
 function closeChat() { $('chat').hidden = true; $('say').blur(); }
@@ -412,6 +514,11 @@ function note(A, what) { const log = $('log'), d = document.createElement('div')
 
 /* ---------- intro, HUD, keys ---------- */
 try { $('name').value = localStorage.getItem('blue42.together.name') || ''; } catch (e) {}
+let prefSeat = 0; try { const v = +localStorage.getItem('onaroom.seat'); if (v >= 0 && v < MAX) prefSeat = v; } catch (e) {}
+document.querySelectorAll('#picks button').forEach(b => { const S = SEATS[+b.dataset.s]; b.style.background = 'radial-gradient(circle at 36% 30%,' + S.g[0] + ',' + S.g[1] + ' 55%,' + S.g[2] + ')'; b.setAttribute('role', 'radio');
+  b.addEventListener('click', () => { prefSeat = +b.dataset.s; try { localStorage.setItem('onaroom.seat', String(prefSeat)); } catch (e) {} pickUI(); }); });
+function pickUI() { document.querySelectorAll('#picks button').forEach(b => b.setAttribute('aria-checked', String(+b.dataset.s === prefSeat))); }
+pickUI();
 function showIntro() { started = false; $('intro').hidden = false; for (const id of ['hud', 'seats', 'chat', 'keys']) $(id).hidden = true; $('full').hidden = !roomFull; $('go').hidden = roomFull; }
 function begin() {
   if (started || roomFull) return; started = true; beganAt = time; joinedAt = Date.now(); startAudio();
@@ -428,6 +535,7 @@ function toggleKeys(force) { const k = $('keys'); k.hidden = force != null ? !fo
 $('info').addEventListener('click', () => toggleKeys());
 $('kx').addEventListener('click', () => toggleKeys(false));
 $('mic').addEventListener('click', toggleMic);
+$('cam').addEventListener('click', toggleCam);
 $('talk').addEventListener('click', openChat);
 $('view').addEventListener('click', toggleView);
 $('invite').addEventListener('click', async () => {
@@ -442,7 +550,12 @@ const stage = $('stage');
 stage.addEventListener('pointerdown', e => {
   if (!started || e.target.closest('.ui') || e.target.closest('#chat') || e.target.closest('#intro')) return;
   startAudio(); if (inp.id !== null) return;
-  if (e.timeStamp - inp.lastTap < 300 && Math.hypot(e.clientX - inp.lx, e.clientY - inp.ly) < 60) mv.burst = 2.6;
+  if (e.timeStamp - inp.lastTap < 320 && Math.hypot(e.clientX - inp.lx, e.clientY - inp.ly) < 60) {
+    const A = orbAt(e.clientX, e.clientY);
+    if (A) { toggleWatch(A); inp.lastTap = 0; return; }
+    if (onView(e.clientX, e.clientY)) { closeView(); inp.lastTap = 0; return; }
+    mv.burst = 2.6;
+  }
   inp.lastTap = e.timeStamp; inp.lx = e.clientX; inp.ly = e.clientY; inp.id = e.pointerId; inp.hold = true; inp.x0 = e.clientX; inp.y0 = e.clientY; inp.sx = inp.sy = 0;
   try { stage.setPointerCapture(e.pointerId); } catch (err) {}
 });
@@ -453,10 +566,11 @@ addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
   if (!started) { if (k === 'i') toggleKeys(); return; }
   if (k === 'enter') { e.preventDefault(); openChat(); return; }
-  if (k === 'escape') { toggleKeys(false); return; }
-  if (e.repeat && 'imtvnx'.includes(k)) return;
+  if (k === 'escape') { if (VIEW && VIEW.open) closeView(); toggleKeys(false); return; }
+  if (e.repeat && 'imtvnxc'.includes(k)) return;
   if (k === 'i') { toggleKeys(); return; }
   if (k === 'm') { toggleMic(); return; }
+  if (k === 'c') { toggleCam(); return; }
   if (k === 'v') { toggleView(); return; }
   if (k === 'n') { freshRoom(); return; }
   if (k === 'x') { if (me.msg) setOverhead(''); return; }
@@ -511,20 +625,21 @@ function frame(now) {
   PADM.forEach((m, i) => { m.material.opacity = (i === mySeat ? .75 : .4) + .1 * Math.sin(time * 1.2 + i); });
   // me
   me.level = lerp(me.level, TALKING() ? Math.min(1, level(myMeter) * 6) : 0, 1 - Math.exp(-dt * 12));
-  placeAvatar(me, pos, dt);
+  placeAvatar(me, pos, dt); ringFrame(me, dt);
   // everyone else
   for (const [, A] of OTHERS) {
     A.sp.visible = !!A.placed; A.halo.visible = A.sp.visible; if (A.label) A.label.visible = A.sp.visible; if (!A.placed) continue;
     A.pos.lerp(A.target, 1 - Math.exp(-dt * 8));
     A.level = lerp(A.level, Math.min(1, level(A.v) * 6), 1 - Math.exp(-dt * 12));
-    placeAvatar(A, A.pos, dt);
+    placeAvatar(A, A.pos, dt); ringFrame(A, dt);
     if (A.v && ac) { const t = ac.currentTime, P = A.v.pan; if (P.positionX) { P.positionX.setValueAtTime(A.pos.x, t); P.positionY.setValueAtTime(A.pos.y, t); P.positionZ.setValueAtTime(A.pos.z, t); } else P.setPosition(A.pos.x, A.pos.y, A.pos.z); A.v.g.gain.setTargetAtTime(voiceGain(A), t, .2); }
   }
-  syncTwins(); listen(); engineFrame(); netFrame(now);
+  viewFrame(dt); syncTwins(); listen(); engineFrame(); netFrame(now);
   renderer.render(scene, camera);
 }
 requestAnimationFrame(frame);
 seatsUI();
+if (Array.isArray(window.__RELAYS)) window.__T = { OTHERS, toggleWatch, get VIEW() { return VIEW; }, get seat() { return mySeat; }, get watch() { return WATCH.size; } };   // local test hook only
 })();
 </script>
 </body>
