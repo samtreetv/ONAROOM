@@ -184,7 +184,7 @@ ${nt}`;Ze.test(B)&&(We(j),j=setTimeout(Ce,Bu),Xe(j))},Oe=()=>{h.iceGatheringStat
 */
 </script>
 <script>
-/* ONAROOM v14. Parts of this file are ported from Bencho blocks (Magnetic select, Tilt card, Aspect ratio, Eye tracker, Card swap):
+/* ONAROOM v15. Parts of this file are ported from Bencho blocks (Magnetic select, Tilt card, Aspect ratio, Eye tracker, Card swap):
    MIT License · Copyright (c) 2026 Lorenzo Cabra · https://bencho.dev/licence
    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
    to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
@@ -612,13 +612,13 @@ const BIRDS = (() => {
     for (let i = 0; i < n; i++) F.birds.push({ o: new V3((rnd() - .5) * spread[0], (rnd() - .5) * spread[1], (rnd() - .5) * spread[0]), ph: rnd() * 6.28, sp: K.beat[0] + rnd() * (K.beat[1] - K.beat[0]), s: K.size[0] + rnd() * (K.size[1] - K.size[0]), b: make(K, 0), t: make(K, 1) });
     schools.push(F);
   }
-  for (let f = 0; f < 3; f++) school('swallow', 'loop', 6 + Math.floor(rnd() * 5), { R: (f < 1 ? 80 : 190) + rnd() * 260, w: (.035 + rnd() * .03) * (rnd() < .5 ? -1 : 1), ph: rnd() * 6.28, h: (f < 1 ? 20 : 40) + rnd() * 50, wob: rnd() * 6.28 }, [22, 7]);
-  for (let f = 0; f < 2; f++) school('dove', 'loop', 4 + Math.floor(rnd() * 3), { R: 120 + rnd() * 160, w: (.018 + rnd() * .01) * (f ? -1 : 1), ph: rnd() * 6.28, h: 26 + rnd() * 20, wob: rnd() * 6.28 }, [16, 4]);
-  for (let f = 0; f < 2; f++) school('cardinal', 'eight', 2 + Math.floor(rnd() * 3), { R: 60 + rnd() * 80, w: (.045 + rnd() * .02), ph: rnd() * 6.28, h: 9 + rnd() * 8, wob: rnd() * 6.28 }, [7, 2]);
-  school('jay', 'pass', 1, { R: 80 + rnd() * 120, ph: rnd() * 90, every: 100, dur: 40, h: 22, wob: rnd() * 6.28 }, [0, 0]);
+  for (let f = 0; f < 2; f++) school('swallow', 'loop', 3 + Math.floor(rnd() * 2), { R: (f < 1 ? 80 : 190) + rnd() * 260, w: (.035 + rnd() * .03) * (rnd() < .5 ? -1 : 1), ph: rnd() * 6.28, h: (f < 1 ? 20 : 40) + rnd() * 50, wob: rnd() * 6.28 }, [22, 7]);
+  for (let f = 0; f < 1; f++) school('dove', 'loop', 3, { R: 120 + rnd() * 160, w: (.018 + rnd() * .01) * (f ? -1 : 1), ph: rnd() * 6.28, h: 26 + rnd() * 20, wob: rnd() * 6.28 }, [16, 4]);
+  for (let f = 0; f < 1; f++) school('cardinal', 'eight', 2, { R: 60 + rnd() * 80, w: (.045 + rnd() * .02), ph: rnd() * 6.28, h: 9 + rnd() * 8, wob: rnd() * 6.28 }, [7, 2]);
+  school('jay', 'pass', 1, { R: 80 + rnd() * 120, ph: rnd() * 90, every: 240, dur: 40, h: 22, wob: rnd() * 6.28 }, [0, 0]);
 
   // the murmuration: one shared shape that breathes between a ball, a ribbon and a wave; many tiny birds, one draw
-  const MN = 170, mG = new THREE.BufferGeometry(); mG.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, .3, -1, 0, -.2, 0, 0, -.25,   0, 0, .3, 1, 0, -.2, 0, 0, -.25], 3));
+  const MN = 110, mG = new THREE.BufferGeometry(); mG.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, .3, -1, 0, -.2, 0, 0, -.25,   0, 0, .3, 1, 0, -.2, 0, 0, -.25], 3));
   const mM = new THREE.MeshBasicMaterial({ color: '#1e1a30', transparent: true, opacity: .78, side: THREE.DoubleSide, depthWrite: false, fog: false });
   const mT = mM.clone(); mT.opacity = .2; mT.depthTest = false;
   const mur = new THREE.InstancedMesh(mG, mM, MN), murT = new THREE.InstancedMesh(mG, mT, MN); mur.frustumCulled = murT.frustumCulled = false; scene.add(mur, murT);
@@ -658,7 +658,7 @@ const BIRDS = (() => {
       }
     }
     // murmuration: comes for about two and a half minutes out of every six
-    const cyc = (t % 360) / 360, on = sm(0, .06, cyc) * (1 - sm(.36, .42, cyc));
+    const cyc = (t % 900) / 900, on = sm(0, .03, cyc) * (1 - sm(.14, .17, cyc));
     mur.visible = on > .01; murT.visible = mur.visible;
     if (mur.visible) {
       const ca = t * .012; mc.set(Math.cos(ca) * 300, 95 + 15 * Math.sin(t * .05), Math.sin(ca) * 300);

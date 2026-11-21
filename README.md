@@ -34,6 +34,7 @@ Live: **https://samtreetv.github.io/ONAROOM/**
 - Pixelify Sans and Noto Emoji: SIL Open Font License.
 
 ## Versions
+- **v15:** far fewer birds (2 small swallow schools, 3 doves, 2 cardinals, the blue jay every 4 minutes, the murmuration about 2 minutes in every 15).
 - **v14:** schools of birds on separate paths: swallows in high loops, doves circling slowly, cardinals bounding low in small groups, an occasional blue jay passing alone, and a starling murmuration that dances far out every few minutes. All on a shared clock, so everyone sees the same sky.
 - **v13:** float-in dots glow and dissolve into a soft flash as your orb forms, with a bell and you hold still until it has formed; prettier birds (swept wings whose tips follow a beat late, forked tails).
 - **v12:** float-in dots become your actual orb.
