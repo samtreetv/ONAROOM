@@ -184,7 +184,7 @@ ${nt}`;Ze.test(B)&&(We(j),j=setTimeout(Ce,Bu),Xe(j))},Oe=()=>{h.iceGatheringStat
 */
 </script>
 <script>
-/* ONAROOM v12. Parts of this file are ported from Bencho blocks (Magnetic select, Tilt card, Aspect ratio, Eye tracker, Card swap):
+/* ONAROOM v14. Parts of this file are ported from Bencho blocks (Magnetic select, Tilt card, Aspect ratio, Eye tracker, Card swap):
    MIT License · Copyright (c) 2026 Lorenzo Cabra · https://bencho.dev/licence
    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
    to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
@@ -578,36 +578,98 @@ const inCommons = p => rho(p.x, p.z) < COMMONS;
 function voiceGain(A) { if (presenterIds().has(A.id)) return 1; if (inCommons(pos) && inCommons(A.pos)) return 1; const d = pos.distanceTo(A.pos); return d < 50 ? 1 : clamp(1 - (d - 50) / 700, .12, 1); }
 
 
-/* ---------- birds: little flocks on a shared clock, so everyone sees the same ones ---------- */
+/* ---------- birds: schools of different birds, each on its own path, on a shared clock so everyone sees the same sky ----------
+   swallows glide in wide loops up high · doves circle slow and steady · cardinals bound low in little groups ·
+   now and then a blue jay crosses alone · and every few minutes a murmuration dances far out over the mirror */
 const BIRDS = (() => {
-  const wingG = new THREE.BufferGeometry(); wingG.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, -.55, 0, 0, .45, -1.7, 0, .15], 3));
-  const bodyG = new THREE.BufferGeometry(); bodyG.setAttribute('position', new THREE.Float32BufferAttribute([0, .02, -.95, .14, 0, .45, -.14, 0, .45], 3));
-  const mat = new THREE.MeshBasicMaterial({ color: '#1f2c4c', transparent: true, opacity: .62, side: THREE.DoubleSide, depthWrite: false, fog: false });
-  const twinM = mat.clone(); twinM.opacity = .22; twinM.depthTest = false;
   const rnd = (s => () => (s = (s * 16807) % 2147483647) / 2147483647)(42);   // the same random for everyone
-  const make = m => { const g = new THREE.Group(), L = new THREE.Mesh(wingG, m), R = new THREE.Mesh(wingG, m); R.scale.x = -1; g.add(L, R, new THREE.Mesh(bodyG, m)); scene.add(g); return { g, L, R }; };
-  const flocks = [];
-  for (let f = 0; f < 5; f++) {
-    const F = { R: (f < 2 ? 70 : 170) + rnd() * (f < 2 ? 90 : 360), w: (.035 + rnd() * .03) * (rnd() < .5 ? -1 : 1), ph: rnd() * 6.28, h: (f < 2 ? 16 : 34) + rnd() * (f < 2 ? 22 : 60), wob: rnd() * 6.28, birds: [] };
-    const n = 6 + Math.floor(rnd() * 6);
-    for (let i = 0; i < n; i++) F.birds.push({ o: new V3((rnd() - .5) * 22, (rnd() - .5) * 7, (rnd() - .5) * 22), ph: rnd() * 6.28, sp: 8 + rnd() * 3, s: .8 + rnd() * .45, b: make(mat), t: make(twinM) });
-    flocks.push(F);
+  const geo = (pts, shade) => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(shade.flatMap(v => [v, v, v]), 3)); return g; };
+  // a bird is still a handful of flat triangles: inner wing, outer wing that folds a beat later, a slim body and a tail
+  const innerG = geo([0, 0, .42, 0, 0, -.38, -.95, 0, .16,   0, 0, -.38, -.95, 0, -.18, -.95, 0, .16], [.8, .8, 1, .8, 1, 1]);
+  const SWEPT = geo([0, 0, .16, 0, 0, -.18, -1.15, 0, -.5], [1, 1, 1.25]);         // swallow, jay: pointed and swept back
+  const ROUND = geo([0, 0, .16, 0, 0, -.18, -.75, 0, -.28,   0, 0, .16, -.75, 0, -.28, -.9, 0, .02], [1, 1, 1.2, 1, 1.2, 1.25]);   // dove, cardinal: broad and rounded
+  const FORK = geo([0, .03, .95, .12, 0, .1, -.12, 0, .1,   .12, 0, .1, -.12, 0, .1, 0, 0, -.5,   0, 0, -.42, .2, 0, -.86, 0, 0, -.62,   0, 0, -.42, 0, 0, -.62, -.2, 0, -.86], [1, 1, 1, 1, 1, 1, 1, 1.2, 1, 1, 1, 1.2]);
+  const FAN = geo([0, .03, .9, .16, 0, .1, -.16, 0, .1,   .16, 0, .1, -.16, 0, .1, 0, 0, -.45,   0, 0, -.4, .2, 0, -.95, -.2, 0, -.95], [1, 1, 1, 1, 1, 1, 1, 1.1, 1.1]);
+  const M = (c, o) => { const m = new THREE.MeshBasicMaterial({ color: c, vertexColors: true, transparent: true, opacity: o, side: THREE.DoubleSide, depthWrite: false, fog: false }); const t = m.clone(); t.opacity = o * .34; t.depthTest = false; return [m, t]; };
+  const KINDS = {
+    swallow:  { body: M('#1c2747', .74), wing: M('#2a3b63', .74), outer: SWEPT, tail: FORK, size: [.8, 1.25], beat: [8, 11], style: 'glide' },
+    dove:     { body: M('#d9d6e4', .9), wing: M('#c4c1d3', .9), outer: ROUND, tail: FAN, size: [1.3, 1.55], beat: [5.5, 6.5], style: 'steady' },
+    cardinal: { body: M('#a8121d', .95), wing: M('#d0303a', .95), outer: ROUND, tail: FAN, size: [.75, .9], beat: [13, 16], style: 'bound' },
+    jay:      { body: M('#e9eef8', .95), wing: M('#3a76d6', .95), outer: SWEPT, tail: FAN, size: [1.1, 1.2], beat: [9, 11], style: 'bound' }
+  };
+  const make = (K, twin) => { const k = twin ? 1 : 0, g = new THREE.Group(), side = s => { const w = new THREE.Group(), i = new THREE.Mesh(innerG, K.wing[k]), o = new THREE.Mesh(K.outer, K.wing[k]); o.position.x = -.95; i.add(o); w.add(i); w.scale.x = s; g.add(w); return { i, o }; };
+    const L = side(1), R = side(-1); g.add(new THREE.Mesh(K.tail, K.body[k])); scene.add(g); return { g, L, R }; };
+  // paths: each school has its own; all take the shared time t and write a centre into out
+  const PATHS = {
+    loop: F => (t, out) => { const a = F.ph + F.w * t, r = F.R + 40 * Math.sin(t * .05 + F.wob); return out.set(Math.cos(a) * r, F.h + 9 * Math.sin(t * .13 + F.wob), Math.sin(a) * r); },
+    eight: F => (t, out) => { const a = F.ph + F.w * t; return out.set(Math.sin(a) * F.R, F.h + 3 * Math.sin(t * .3 + F.wob), Math.sin(a * 2) * F.R * .45).applyAxisAngle(UPV, F.wob); },
+    pass: F => (t, out) => { const k = ((t + F.ph) % F.every) / F.dur, u = k * 2 - 1; return out.set(u * 440, F.h + 6 * Math.sin(k * 9), F.R).applyAxisAngle(UPV, F.wob + Math.floor((t + F.ph) / F.every) * 2.4); }
+  };
+  const UPV = new V3(0, 1, 0);
+  const schools = [];
+  function school(kind, path, n, F, spread) {
+    const K = KINDS[kind]; F.kind = kind; F.K = K; F.at = PATHS[path](F); F.spread = spread; F.birds = [];
+    for (let i = 0; i < n; i++) F.birds.push({ o: new V3((rnd() - .5) * spread[0], (rnd() - .5) * spread[1], (rnd() - .5) * spread[0]), ph: rnd() * 6.28, sp: K.beat[0] + rnd() * (K.beat[1] - K.beat[0]), s: K.size[0] + rnd() * (K.size[1] - K.size[0]), b: make(K, 0), t: make(K, 1) });
+    schools.push(F);
   }
-  const at = (F, t, out) => { const a = F.ph + F.w * t, r = F.R + 40 * Math.sin(t * .05 + F.wob); return out.set(Math.cos(a) * r, F.h + 9 * Math.sin(t * .13 + F.wob), Math.sin(a) * r); };
-  const c0 = new V3(), c1 = new V3(), p = new V3(), q = new V3();
+  for (let f = 0; f < 3; f++) school('swallow', 'loop', 6 + Math.floor(rnd() * 5), { R: (f < 1 ? 80 : 190) + rnd() * 260, w: (.035 + rnd() * .03) * (rnd() < .5 ? -1 : 1), ph: rnd() * 6.28, h: (f < 1 ? 20 : 40) + rnd() * 50, wob: rnd() * 6.28 }, [22, 7]);
+  for (let f = 0; f < 2; f++) school('dove', 'loop', 4 + Math.floor(rnd() * 3), { R: 120 + rnd() * 160, w: (.018 + rnd() * .01) * (f ? -1 : 1), ph: rnd() * 6.28, h: 26 + rnd() * 20, wob: rnd() * 6.28 }, [16, 4]);
+  for (let f = 0; f < 2; f++) school('cardinal', 'eight', 2 + Math.floor(rnd() * 3), { R: 60 + rnd() * 80, w: (.045 + rnd() * .02), ph: rnd() * 6.28, h: 9 + rnd() * 8, wob: rnd() * 6.28 }, [7, 2]);
+  school('jay', 'pass', 1, { R: 80 + rnd() * 120, ph: rnd() * 90, every: 100, dur: 40, h: 22, wob: rnd() * 6.28 }, [0, 0]);
+
+  // the murmuration: one shared shape that breathes between a ball, a ribbon and a wave; many tiny birds, one draw
+  const MN = 170, mG = new THREE.BufferGeometry(); mG.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, .3, -1, 0, -.2, 0, 0, -.25,   0, 0, .3, 1, 0, -.2, 0, 0, -.25], 3));
+  const mM = new THREE.MeshBasicMaterial({ color: '#1e1a30', transparent: true, opacity: .78, side: THREE.DoubleSide, depthWrite: false, fog: false });
+  const mT = mM.clone(); mT.opacity = .2; mT.depthTest = false;
+  const mur = new THREE.InstancedMesh(mG, mM, MN), murT = new THREE.InstancedMesh(mG, mT, MN); mur.frustumCulled = murT.frustumCulled = false; scene.add(mur, murT);
+  const MB = []; for (let i = 0; i < MN; i++) MB.push({ a: rnd(), b: rnd(), c: rnd(), ph: rnd() * 6.28 });
+  const dum = new THREE.Object3D(), m0 = new V3(), m1 = new V3(), mc = new V3(), _mv = new V3();
+  const murAt = (B, t, out) => {
+    const w1 = .5 + .5 * Math.sin(t * .09), w2 = .5 + .5 * Math.sin(t * .057 + 1.3);              // how ball-like, how ribbon-like right now
+    const th = B.a * TAU, ph = Math.acos(2 * B.b - 1), R = 26 + 8 * Math.sin(t * .4 + B.c * 6);
+    const bx = Math.sin(ph) * Math.cos(th) * R, by = Math.cos(ph) * R * .7, bz = Math.sin(ph) * Math.sin(th) * R;   // ball
+    const u = B.a * 2 - 1, rx = u * 70, ry = 14 * Math.sin(u * 3 + t * .7) + (B.b - .5) * 10, rz = 22 * Math.sin(u * 2.2 + t * .5) + (B.c - .5) * 10;  // ribbon
+    let x = bx + (rx - bx) * w1, y = by + (ry - by) * w1, z = bz + (rz - bz) * w1;
+    const sq = .45 + .9 * w2, ang = t * .21; const cs = Math.cos(ang), sn = Math.sin(ang), along = x * cs + z * sn;   // a wave of turning squeezes the flock along one axis
+    x += (along * sq - along) * cs; z += (along * sq - along) * sn;
+    x += 6 * Math.sin(t * 1.1 + B.ph + B.b * 4); y += 4 * Math.sin(t * .9 + B.ph * 1.7); z += 6 * Math.cos(t * 1.3 + B.ph + B.a * 5);   // each bird's own wobble
+    return out.set(x, y, z);
+  };
+  const c0 = new V3(), c1 = new V3(), p = new V3(), q = new V3(), dir = new V3();
+  if (Array.isArray(window.__RELAYS)) window.__BS = schools;   // local test hook only
   return function frame() {
     const t = Date.now() / 1000;
-    for (const F of flocks) {
-      at(F, t, c0); at(F, t + .5, c1); const dir = c1.sub(c0).normalize();
+    for (const F of schools) {
+      F.at(t, c0); F.at(t + .5, c1); dir.copy(c1).sub(c0); const moving = dir.lengthSq() > 1e-6; dir.normalize();
+      const show = F.kind !== 'jay' || ((t + F.ph) % F.every) < F.dur;     // the jay only comes now and then
       for (const B of F.birds) {
+        B.b.g.visible = show;
         p.copy(c0).add(B.o); p.x += 2.2 * Math.sin(t * .7 + B.ph); p.y += 1.4 * Math.sin(t * .9 + B.ph * 2); p.z += 2.2 * Math.cos(t * .6 + B.ph);
-        const glide = sm(-.35, .35, Math.sin(t * .4 + B.ph)), flap = .12 + glide * .62 * Math.sin(t * B.sp + B.ph);
-        B.t.g.visible = rho(p.x, p.z) < R0 - 20;
+        const wave = Math.sin(t * B.sp + B.ph); let flap, tip, fold = 1;
+        if (F.K.style === 'glide') { const glide = sm(-.35, .35, Math.sin(t * .4 + B.ph)); flap = .1 + glide * .55 * wave; tip = -.06 + glide * .5 * Math.sin(t * B.sp + B.ph - .7); }
+        else if (F.K.style === 'steady') { flap = .15 + .45 * wave; tip = .05 + .3 * Math.sin(t * B.sp + B.ph - .6); }
+        else { const cyc = (t * .9 + B.ph) % 1, on = cyc < .55; flap = on ? .2 + .6 * wave : .08; tip = on ? .3 * Math.sin(t * B.sp + B.ph - .6) : -.1; fold = on ? 1 : .32;   // bound: a burst of beats, then wings folded in
+          p.y += 1.6 * Math.sin(cyc * TAU); }                                                                               // ...so the flight rises and dips
+        B.t.g.visible = show && rho(p.x, p.z) < R0 - 20;
         for (const [X, ty] of [[B.b, 1], [B.t, -1]]) {
-          X.g.position.set(p.x, p.y * ty, p.z); q.set(p.x + dir.x, (p.y + dir.y) * ty, p.z + dir.z); X.g.lookAt(q);
-          X.g.scale.set(B.s * 2.4, B.s * 2.4 * ty, B.s * 2.4); X.L.rotation.z = flap; X.R.rotation.z = -flap;
+          X.g.position.set(p.x, p.y * ty, p.z); q.set(p.x + dir.x, (p.y + dir.y) * ty, p.z + dir.z); if (moving) X.g.lookAt(q);
+          X.g.scale.set(B.s * 2.4, B.s * 2.4 * ty, B.s * 2.4); X.L.i.rotation.z = X.R.i.rotation.z = flap; X.L.o.rotation.z = X.R.o.rotation.z = tip; X.L.i.scale.x = X.R.i.scale.x = fold;
         }
       }
+    }
+    // murmuration: comes for about two and a half minutes out of every six
+    const cyc = (t % 360) / 360, on = sm(0, .06, cyc) * (1 - sm(.36, .42, cyc));
+    mur.visible = on > .01; murT.visible = mur.visible;
+    if (mur.visible) {
+      const ca = t * .012; mc.set(Math.cos(ca) * 300, 95 + 15 * Math.sin(t * .05), Math.sin(ca) * 300);
+      const twinOn = rho(mc.x, mc.z) < R0 - 40;
+      for (let i = 0; i < MN; i++) {
+        const B = MB[i]; murAt(B, t, m0); murAt(B, t + .15, m1); m0.add(mc); m1.add(mc).add(_mv.set(-Math.sin(ca), 0, Math.cos(ca)).multiplyScalar(3.6 * .15));
+        const k = on * (i / MN < on ? 1 : 0), fl = .55 + .45 * Math.sin(t * 14 + B.ph * 3);
+        dum.position.copy(m0); dum.lookAt(m1); dum.scale.set(1.3 * fl * k, 1.3 * k, 1.3 * k); dum.updateMatrix(); mur.setMatrixAt(i, dum.matrix);
+        dum.position.y = -m0.y; dum.scale.y = -1.3 * k; if (!twinOn) dum.scale.set(0, 0, 0); dum.updateMatrix(); murT.setMatrixAt(i, dum.matrix);
+      }
+      mur.instanceMatrix.needsUpdate = murT.instanceMatrix.needsUpdate = true;
     }
   };
 })();
@@ -1066,6 +1128,9 @@ function sfx(kind) {
   else if (kind === 'pop') { o.type = 'sine'; o.frequency.setValueAtTime(520, t); o.frequency.exponentialRampToValueAtTime(980, t + .08); env(.004, .12, .8); o.start(t); o.stop(t + .16); }
   else if (kind === 'open') { o.type = 'sine'; o.frequency.setValueAtTime(392, t); o.frequency.setValueAtTime(587, t + .07); o.frequency.setValueAtTime(784, t + .14); env(.01, .32, .7); o.start(t); o.stop(t + .4); }
   else if (kind === 'back') { o.type = 'sine'; o.frequency.setValueAtTime(784, t); o.frequency.exponentialRampToValueAtTime(330, t + .18); env(.005, .22, .6); o.start(t); o.stop(t + .28); }
+  else if (kind === 'gather') { o.type = 'triangle'; const o2 = ac.createOscillator(); o2.type = 'sine'; o2.connect(g); o.frequency.setValueAtTime(330, t); o.frequency.exponentialRampToValueAtTime(880, t + .9); o2.frequency.setValueAtTime(332, t); o2.frequency.exponentialRampToValueAtTime(1320, t + .9); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.18 * v, t + .75); g.gain.linearRampToValueAtTime(0, t + .95); o.start(t); o2.start(t); o.stop(t + 1); o2.stop(t + 1); }
+  else if (kind === 'form') { o.type = 'sine'; o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(55, t + .25); env(.005, .3, .9); o.start(t); o.stop(t + .35);   // a soft thump under a bell
+    [523.25, 783.99, 1046.5, 1567.98].forEach((f, i) => { const b = ac.createOscillator(), bg = ac.createGain(), s0 = t + i * .035; b.type = 'sine'; b.frequency.value = f * (1 + (i % 2 ? .002 : -.002)); b.connect(bg); bg.connect(master); bg.gain.setValueAtTime(0, s0); bg.gain.linearRampToValueAtTime(v * (.55 - i * .1), s0 + .006); bg.gain.exponentialRampToValueAtTime(.0001, s0 + 1.6 - i * .2); b.start(s0); b.stop(s0 + 1.7); }); }
   else if (kind === 'whoosh') { o.type = 'sawtooth'; const f = ac.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 2; o.disconnect(); o.connect(f); f.connect(g); o.frequency.setValueAtTime(90, t); f.frequency.setValueAtTime(300, t); f.frequency.exponentialRampToValueAtTime(2400, t + .5); env(.08, .55, .45); o.start(t); o.stop(t + .7); }
 }
 
@@ -1128,12 +1193,16 @@ function burst(done) {
     const dots = [];
     for (let i = 0; i < 560; i++) { const rr = Math.sqrt(Math.random()) * R * 1.14, a = Math.random() * TAU, sp = 120 + Math.random() * 380;
       dots.push({ x: cx + Math.cos(a) * rr, y: cy + Math.sin(a) * rr, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, c: rr < R * .25 || Math.random() < .1 ? '#ffffff' : cols[i % 3], s: 1.5 + Math.random() * 2.3, ph: Math.random() * TAU, home: false, delay: Math.random() * .35 }); }
-    c.hidden = false; let t = 0, gt = -1, last = performance.now(), popped = false;
+    c.hidden = false; let t = 0, gt = -1, last = performance.now(), popped = false, gl = 0;
+    const GLOW = {}; for (const col of [...cols, '#ffffff']) { const s = document.createElement('canvas'); s.width = s.height = 32; const g = s.getContext('2d'), r = g.createRadialGradient(16, 16, 0, 16, 16, 16); r.addColorStop(0, '#ffffff'); r.addColorStop(.18, col); r.addColorStop(.5, col + '55'); r.addColorStop(1, col + '00'); g.fillStyle = r; g.fillRect(0, 0, 32, 32); GLOW[col] = s; }
+    const hx = (c, a) => c + Math.round(clamp(a, 0, 1) * 255).toString(16).padStart(2, '0');
+    const bloom = (X, Y, R, a) => { if (a <= .01) return; const r = x.createRadialGradient(X, Y, 0, X, Y, R); r.addColorStop(0, hx('#ffffff', a)); r.addColorStop(.22, hx(P.g[0], a * .7)); r.addColorStop(.55, hx(P.g[1], a * .18)); r.addColorStop(1, hx(P.g[1], 0)); x.fillStyle = r; x.beginPath(); x.arc(X, Y, R, 0, TAU); x.fill(); };
     (function step(now) {
       const dt = Math.min(.04, (now - last) / 1000); last = now; t += dt; x.clearRect(0, 0, W, H);
       const O = orbOnScreen();
       // 3 · hang as a slow cloud until you have a place (or 2.4s pass), then gather
-      if (gt < 0 && t > .55 && (mySeat >= 0 || t > 2.4)) gt = 0; if (gt >= 0) gt += dt;
+      if (gt < 0 && t > .55 && (mySeat >= 0 || t > 2.4)) { gt = 0; sfx('gather'); } if (gt >= 0) gt += dt;
+      x.globalCompositeOperation = 'lighter';
       let home = 0;
       for (const d of dots) {
         if (gt < 0 || gt < d.delay) { // drift: drag, plus a gentle swirl around the cloud's middle
@@ -1147,13 +1216,19 @@ function burst(done) {
         }
         if (d.home) { home++; continue; }
         d.x += d.vx * dt; d.y += d.vy * dt;
-        x.globalAlpha = 1; x.fillStyle = d.c; x.beginPath(); x.arc(d.x, d.y, d.s, 0, TAU); x.fill();
+        const near = gt < 0 ? 0 : sm(O.r * 5, O.r * .8, Math.hypot(O.x - d.x, O.y - d.y)), sz = d.s * (2.6 - near * 1.4);   // dots soften into light as they arrive
+        x.globalAlpha = .85 - near * .35; x.drawImage(GLOW[d.c], d.x - sz * 2, d.y - sz * 2, sz * 4, sz * 4);
       }
       // 4 · the orb fills as its dots arrive (a soft overshoot at the end)
-      const f = home / dots.length; FORM.k = f < .98 ? f * .92 : FORM.k;
-      if (!popped && (f > .96 || gt > 2.2)) { popped = true; sfx('pop'); ripple(pos.x, pos.z); FORM.t = 0; }
-      if (popped) { FORM.t += dt; const u = Math.min(1, FORM.t / .45); FORM.k = 1 + Math.sin(u * Math.PI) * .22 * (1 - u); }
-      if (!popped || FORM.t < .45) requestAnimationFrame(step); else { FORM.k = 1; FORM.on = false; x.clearRect(0, 0, W, H); c.hidden = true; L.style.cssText = ''; L.style.visibility = ''; }
+      const f = home / dots.length; if (!popped) FORM.k = f * .9;
+      gl = lerp(gl, f, 1 - Math.exp(-dt * 10)); x.globalAlpha = 1;
+      const vr = O.r * .45;   // the orb's visible body
+      if (!popped) bloom(O.x, O.y, vr * (1.3 + gl * 1.1), gl * .85);   // a light gathers where you will be, the orb grows inside it
+      if (!popped && (f > .96 || gt > 2.2)) { popped = true; sfx('form'); ripple(pos.x, pos.z); FORM.t = 0; }
+      if (popped) { FORM.t += dt; const u = Math.min(1, FORM.t / .45), w = Math.min(1, FORM.t / .7); FORM.k = 1 + Math.sin(u * Math.PI) * .22 * (1 - u);
+        bloom(O.x, O.y, vr * (1.6 + w * 2.6), .9 * (1 - w) * (1 - w)); }   // one soft flash that dissolves outward
+      x.globalCompositeOperation = 'source-over';
+      if (!popped || FORM.t < .7) requestAnimationFrame(step); else { FORM.k = 1; FORM.on = false; x.clearRect(0, 0, W, H); c.hidden = true; L.style.cssText = ''; L.style.visibility = ''; }
     })(last);
   }, 240);
 }
@@ -1460,7 +1535,7 @@ function altFrame(dt) {
 }
 function skydive() { if (FALL) return; FALL = { t: 0, drop: true, dive: 1, y0: pos.y, to: 60, dur: 2.2 }; mv.vy = 0; mv.speed = Math.min(mv.speed, 10); sfx('whoosh'); }
 function flash() { const f = $('flash'); f.hidden = false; f.style.transition = 'none'; f.style.opacity = 1; requestAnimationFrame(() => requestAnimationFrame(() => { f.style.transition = 'opacity 1.4s'; f.style.opacity = 0; setTimeout(() => { f.hidden = true; }, 1500); })); sfx('open'); }
-function hop() { if (FALL || !started || SOL.open || SPEC.on) return; mv.hop = .45; mv.speed = Math.min(mv.speed, 6); sfx('back'); }
+function hop() { if (FALL || !started || SOL.open || SPEC.on || FORM.on) return; mv.hop = .45; mv.speed = Math.min(mv.speed, 6); sfx('back'); }
 
 /* ---------- the loop ---------- */
 const fwd = new V3(), camT = new V3(), look = new V3(), camA = new V3(), lookA = new V3();
@@ -1477,7 +1552,8 @@ function frame(now) {
   if (keys.has('a') || keys.has('arrowleft')) sx = -1; if (keys.has('d') || keys.has('arrowright')) sx = 1;
   if (keys.has(' ') || keys.has('e')) sy = 1; if (keys.has('shift') || keys.has('s') || keys.has('arrowdown')) sy = -1;
   if (keys.has('q')) mv.burst = Math.max(mv.burst, hold ? 1.2 : .8);
-  if (!started || SPEC.on || SOL.open || FALL) { hold = false; sx = sy = 0; }
+  if (!started || SPEC.on || SOL.open || FALL || FORM.on) { hold = false; sx = sy = 0; }
+  if (FORM.on) { mv.burst = 0; mv.speed = 0; mv.vy = 0; }   // you hold still until your orb has formed
   const auto = apFrame(dt, hold || sx || sy || keys.has('q'));
   mv.burst = Math.max(0, mv.burst - dt);
   const target = (hold ? 34 : 0) + (mv.burst > 0 ? 46 * sm(0, .4, mv.burst) : 0);
@@ -1521,12 +1597,13 @@ function frame(now) {
   }
   floorMat.uniforms.time.value = fallsMat.uniforms.time.value = time;
   winFrame(dt); cardFrame(dt); tilesFrame(dt); solFrame(dt); landFrame(dt); syncTwins(); listen(); engineFrame(); netFrame(now);
+  if (window.__CAM && Array.isArray(window.__RELAYS)) { const C = window.__CAM; if (C.follow) { camera.position.copy(C.follow.position).add(C.off); camera.lookAt(C.follow.position); } else { camera.position.copy(C.p); camera.lookAt(C.t); } }   // local test hook only
   renderer.render(scene, camera);
 }
 aimSky(); for (let i = 0; i < 4; i++) skyMat.uniforms[SKYU[i]].value.copy(skyGoal[i]);
 requestAnimationFrame(frame);
 seatsUI(); applyTheme(); landBuild(); setColor(me, myCol); connect(); try { if (sessionStorage.getItem('onaroom.host')) { sessionStorage.removeItem('onaroom.host'); hostOpts(true); } } catch (e) {}
-if (Array.isArray(window.__RELAYS)) window.__T = { get CFG() { return CFG; }, applyCfg, archOpen, archSet, hostOpts, rho, get FALL() { return FALL; }, hop, R1, hAt, OTHERS, WINS, TILES, SOL, SPEC, winSet, openCard, closeCard, openSolar, closeSolar, solActivate, solStep, solBack, toggleFeeds, openFeed, flyTo, specOn, specOff, specNext, skyFan, setSky, get myS() { return myS; }, get CARD() { return CARD; }, get seat() { return mySeat; }, get me() { return winMe(); }, get col() { return myCol; }, get pos() { return pos; }, get started() { return started; }, FORM };   // local test hook only
+if (Array.isArray(window.__RELAYS)) window.__T = { get CFG() { return CFG; }, applyCfg, archOpen, archSet, hostOpts, rho, get FALL() { return FALL; }, hop, R1, hAt, OTHERS, WINS, TILES, SOL, SPEC, winSet, openCard, closeCard, openSolar, closeSolar, solActivate, solStep, solBack, toggleFeeds, openFeed, flyTo, specOn, specOff, specNext, skyFan, setSky, get myS() { return myS; }, get CARD() { return CARD; }, get seat() { return mySeat; }, get me() { return winMe(); }, get col() { return myCol; }, get pos() { return pos; }, get started() { return started; }, FORM, get mv() { return mv; } };   // local test hook only
 })();
 </script>
 </body>

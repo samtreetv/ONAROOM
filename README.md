@@ -9,12 +9,13 @@ A mirror sky where up to **4 orbs** fly, talk, type, share screens and use windo
 Live: **https://samtreetv.github.io/ONAROOM/**
 
 ## In the room
-- **Landing:** pick your orb's colour on the ring. Orbs already in the room sit on the ring in their colours. *Float in*: your orb breaks into its own dots, which gather into your orb in the world.
+- **Landing:** pick your orb's colour on the ring. Orbs already in the room sit on the ring in their colours. *Float in*: your orb breaks into its own glowing dots, which gather into your orb in the world and settle in a soft flash.
 - **Make a new room:** works like hosting a lobby. ✚ default · 🎲 random · 📐 architect. Architect sets the shape (circle, rounded square, oval, rounded rectangle), the number of windows (3–12) and a theme (blue42, dusk, night, peach, mint, mono). These choices are stored in the link, e.g. `#drift-u0pr-433`, so everyone who opens it gets the same room.
 - **The world:** a mirror floor. The centre glows softly in the room's shape. Past the windows the floor curves into a waterfall. Fall over the edge and you drop back in over the centre. Fly up through the clouds into space, where the menu forms; you skydive back down when it closes. Flick down on a phone (or press S twice) to hop backwards.
 - **Menu:** press ✚ or I. It's a solar system: 🎙 mic · 🎥 camera · 📺 screen · 👥 people · 🪟 windows · 🔊 volume (drag a person closer to make them louder) · 👁 spectate · ⚙ settings · 🕹 controls.
 - **Windows:** whiteboard, YouTube or notes. 🎤 Present locks a window while you talk about it.
 - **Tiles:** cameras and screens open as tiles you can drag, resize, set to 4:3 / 1:1 / 3:4, or shrink to a dot.
+- **Birds:** swallows, doves, cardinals, the occasional blue jay, and every few minutes a murmuration.
 - **Sky orb** (top left): choose from 9 skies; a history shows who added which colour.
 
 ## Host it yourself
@@ -33,6 +34,8 @@ Live: **https://samtreetv.github.io/ONAROOM/**
 - Pixelify Sans and Noto Emoji: SIL Open Font License.
 
 ## Versions
+- **v14:** schools of birds on separate paths: swallows in high loops, doves circling slowly, cardinals bounding low in small groups, an occasional blue jay passing alone, and a starling murmuration that dances far out every few minutes. All on a shared clock, so everyone sees the same sky.
+- **v13:** float-in dots glow and dissolve into a soft flash as your orb forms, with a bell and you hold still until it has formed; prettier birds (swept wings whose tips follow a beat late, forked tails).
 - **v12:** float-in dots become your actual orb.
 - **v11:** host choices (shape, windows, theme) carried in the link; the centre glow matches the shape.
 - **v10:** mirror floor and waterfall, falling, flying up into space, skydiving back, hop back.
