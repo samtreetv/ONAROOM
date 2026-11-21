@@ -184,7 +184,7 @@ ${nt}`;Ze.test(B)&&(We(j),j=setTimeout(Ce,Bu),Xe(j))},Oe=()=>{h.iceGatheringStat
 */
 </script>
 <script>
-/* ONAROOM v15. Parts of this file are ported from Bencho blocks (Magnetic select, Tilt card, Aspect ratio, Eye tracker, Card swap):
+/* ONAROOM v16. Parts of this file are ported from Bencho blocks (Magnetic select, Tilt card, Aspect ratio, Eye tracker, Card swap):
    MIT License · Copyright (c) 2026 Lorenzo Cabra · https://bencho.dev/licence
    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
    to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
@@ -426,7 +426,7 @@ function startAudio() {
 function engineFrame() {
   if (!ENG || !ac) return; const t = ac.currentTime, v = clamp(mv.speed / 40, 0, 1.6), on = sm(.02, .25, v);
   const f0 = 55 * Math.pow(2, (v * 7 + (mv.burst > 0 ? 5 : 0)) / 12);
-  ENG.out.gain.setTargetAtTime(on * .09 * VOL.orb * (TALKING() ? .35 : 1), t, .15); ENG.rpm.frequency.setTargetAtTime(3 + v * 9, t, .15);
+  ENG.out.gain.setTargetAtTime(on * .045 * VOL.orb * (TALKING() ? .35 : 1), t, .15); ENG.rpm.frequency.setTargetAtTime(3 + v * 9, t, .15);
   ENG.growl.frequency.setTargetAtTime(f0, t, .12); ENG.sub.frequency.setTargetAtTime(f0 / 2, t, .12); ENG.body.frequency.setTargetAtTime(380 + v * 900, t, .15); ENG.shine.frequency.setTargetAtTime(700 + v * 2600, t, .15);
   for (const p of ENG.parts) p.o.frequency.setTargetAtTime(f0 * 2 * p.r, t, .12);
 }
@@ -1121,7 +1121,7 @@ function orbBtn(stops, size, mark, label, f) {
 }
 /* ---------- menu sounds, made in code (no files): tick, pop, open, back, whoosh ---------- */
 function sfx(kind) {
-  if (!ac || VOL.orb === 0) return; const t = ac.currentTime, g = ac.createGain(), o = ac.createOscillator(), v = .16 * Math.max(.25, VOL.orb);
+  if (!ac || VOL.orb === 0) return; const t = ac.currentTime, g = ac.createGain(), o = ac.createOscillator(), v = .12 * Math.max(.25, VOL.orb);
   g.connect(master); o.connect(g);
   const env = (a, d, peak) => { g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak * v, t + a); g.gain.exponentialRampToValueAtTime(.0001, t + a + d); };
   if (kind === 'tick') { o.type = 'triangle'; o.frequency.setValueAtTime(1320, t); o.frequency.exponentialRampToValueAtTime(880, t + .05); env(.003, .07, .55); o.start(t); o.stop(t + .1); }
