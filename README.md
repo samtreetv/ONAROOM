@@ -6,7 +6,7 @@ A mirror sky where up to **4 orbs** fly, talk, type, share screens and use windo
 - Browsers connect directly to each other over WebRTC. Public Nostr relays only make the first introduction.
 - Voice is spatial: people sound louder when you're close, and everyone in the centre can hear each other.
 
-Live: **https://samtreetv.github.io/onaroom/**
+Live: **https://samtreetv.github.io/ONAROOM/**
 
 ## In the room
 - **Landing:** pick your orb's colour on the ring. Orbs already in the room sit on the ring in their colours. *Float in*: your orb breaks into its own dots, which gather into your orb in the world.
