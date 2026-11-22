@@ -141,17 +141,87 @@ button,input{outline:none}
 .rcol{display:flex;flex-direction:column;align-self:flex-start;transition:transform .45s cubic-bezier(.22,1.4,.36,1)}
 .rcol i{font-style:normal;height:1em;line-height:1em;display:block;flex:none;text-align:center;min-width:.62em}
 #arch .go{margin-left:18px}
+/* v17: the landing — arrows instead of the colour ring, twelve colour dots, the orb drawn live */
+#hue::before,#lknob{display:none}
+#hue{cursor:default}
+#lorbgl{display:block;will-change:transform}
+#larr,#ldots{position:absolute;left:50%;top:var(--R);width:0;height:0}
+#larr .larr{position:absolute;top:-29px;width:58px;height:58px;padding:0;border:0;background:none;cursor:pointer;transition:transform .18s cubic-bezier(.3,1.6,.5,1)}
+#larr .larr.l{left:calc(var(--R) * -1.08 - 29px)}
+#larr .larr.r{left:calc(var(--R) * 1.08 - 29px)}
+#larr .larr:hover{transform:scale(1.1)}
+#larr .larr:active{transform:scale(.9)}
+#ldots i{position:absolute;top:calc(var(--R) * .86);width:7px;height:7px;margin:-3.5px;border-radius:50%;opacity:.4;transition:all .25s}
+#ldots i.on{width:12px;height:12px;margin:-6px;opacity:1;box-shadow:0 0 12px currentColor}
+.lmark{left:-13px;top:-13px;width:26px}
+.lmark b{top:28px}
+/* v17: the volume page */
+#volp{position:absolute;left:50%;top:max(138px,calc(11vh + 70px));transform:translateX(-50%);display:flex;flex-direction:column;gap:4px;width:min(460px,94vw);max-height:calc(100vh - 170px);overflow-y:auto;scrollbar-width:none;padding:4px 10px 18px}
+#volp::-webkit-scrollbar{display:none}
+.vrow{display:grid;grid-template-columns:50px 1fr 132px;align-items:center;gap:10px;min-height:52px}
+.vrow .ob{width:50px;height:50px;padding:0;border:0;background:none;cursor:pointer}
+.vt{position:relative;height:36px;cursor:pointer;touch-action:none}
+.vt::before{content:"";position:absolute;left:0;right:0;top:50%;height:6px;margin-top:-3px;border-radius:3px;background:linear-gradient(90deg,rgba(255,255,255,.05),rgba(255,255,255,.22))}
+.vf{position:absolute;left:0;top:50%;height:6px;margin-top:-3px;border-radius:3px;background:linear-gradient(90deg,transparent,var(--c));box-shadow:0 0 12px var(--c);transition:width .08s}
+.vk{position:absolute;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;pointer-events:none;transition:left .08s}
+.vt.tog{max-width:64px}
+.vt.tog .vf,.vt.tog .vk{transition:all .25s cubic-bezier(.3,1.5,.5,1)}
+.vw{font:700 13px var(--pix);color:#ffff00;text-shadow:1px 1px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vrow.off .vw{color:#b9b9b9}
+.vrow.off .vk{filter:saturate(.2) brightness(.7)}
+@media (max-width:520px){.vrow{grid-template-columns:44px 1fr 104px}.vrow .ob{width:44px;height:44px}.vw{font-size:11px}}
+/* v18: the landing — 24 orbs floating between two words */
+#lgl{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+#intro{background:radial-gradient(70% 55% at 50% 50%,rgba(20,50,120,.28),transparent)}
+#hue,#larr,#ldots,#lmarks,.lacts:not(#host),#lroom{display:none!important}
+#lorb{position:fixed!important;left:50%;top:50%;width:10px;height:10px;transform:translate(-50%,-50%);animation:none!important;visibility:hidden;pointer-events:none}
+.lt{position:absolute;left:50%;transform:translateX(-50%);border:0;background:none;padding:6px 14px;cursor:pointer;white-space:nowrap;font:700 clamp(26px,8.4vw,68px)/1 var(--pix);color:#ffff00;text-shadow:3px 3px 0 #000;letter-spacing:.02em;transition:opacity .35s,transform .2s;z-index:2}
+#lt1{top:max(calc(env(safe-area-inset-top,0px) + 4vh),24px)}
+#lt2{font-size:clamp(22px,6.8vw,60px)!important;bottom:max(calc(env(safe-area-inset-bottom,0px) + 5vh),28px)}
+.lt:hover{transform:translateX(-50%) scale(1.04)}
+.lt:active{transform:translateX(-50%) scale(.97)}
+.lt.dim{opacity:.28}
+#intro.named .lt{opacity:.22}
+#land{position:absolute!important;left:50%;top:auto;bottom:max(calc(env(safe-area-inset-bottom,0px) + 15vh),110px);transform:translateX(-50%);flex-direction:row!important;gap:10px!important;opacity:0;pointer-events:none;transition:opacity .3s;z-index:3}
+#intro.named #land,#land:has(#host:not([hidden])){opacity:1;pointer-events:auto}
+#land #name{font-size:clamp(20px,5.6vw,34px);width:min(50vw,320px);height:52px}
+#host{flex-direction:row}
+#lgob .ob{width:56px;height:56px;padding:0;border:0;background:none;cursor:pointer}
+/* v19: pick your orb — the others orbit; arrows, your name above, the name line below */
+.larrow{position:absolute;transform:translate(-50%,-50%);width:54px;height:54px;padding:0;border:0;background:none;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s,transform .18s cubic-bezier(.3,1.6,.5,1);z-index:3}
+#intro.named .larrow{opacity:1;pointer-events:auto}
+.larrow:hover{transform:translate(-50%,-50%) scale(1.1)}
+.larrow:active{transform:translate(-50%,-50%) scale(.9)}
+#ltop{position:absolute;transform:translate(-50%,-100%);font:700 clamp(22px,6vw,34px)/1 var(--pix);text-shadow:2px 2px 0 #000;white-space:nowrap;pointer-events:none;z-index:3;opacity:0;transition:opacity .3s}
+#intro.named #ltop{opacity:1}
+#land{bottom:auto!important;align-items:center!important}
+#laa{width:46px;height:46px;padding:0;border:0;background:none;cursor:pointer}
+#land #name{color:#ffff00;text-shadow:2px 2px 0 #000}
+/* v20: a calm load-in */
+#boot{position:fixed;inset:0;z-index:100;pointer-events:none;background:radial-gradient(120% 90% at 50% 40%,#8db8ff,#5d8fe8 55%,#3d64c4);transition:opacity .8s ease}
+#boot.gone{opacity:0}
+#lgl{image-rendering:pixelated;opacity:0;animation:lglIn .9s ease .25s forwards}
+#lgl.sharp{image-rendering:auto}
+@keyframes lglIn{to{opacity:1}}
+.lt{opacity:0;animation:lglIn .9s ease .45s forwards}
+#intro.named .lt{animation:none;opacity:.22}
+.lt.dim{animation:none}
 </style>
 </head>
 <body class="pixel">
 <div id="stage">
   <canvas id="c" role="img" aria-label="A mirror floor under a bright blue sky, a ring of 9 windows, and up to four glowing orbs"></canvas>
   <div id="intro">
+    <button id="lt1" class="lt" type="button">enter lobby</button>
+    <button id="lt2" class="lt" type="button">create your own room</button>
     <div id="land">
       <div id="hue" role="slider" aria-label="Your orb's colour"><div id="lknob"></div></div>
       <div id="lorb"></div>
+      <div id="larr"></div>
+      <div id="ldots"></div>
       <div id="lmarks"></div>
-      <input id="name" maxlength="18" placeholder="your name" autocomplete="off" aria-label="Your name">
+      <input id="name" maxlength="18" placeholder="your name" autocomplete="off" enterkeyhint="go" aria-label="Your name">
+      <div id="lgob"></div>
       <div class="lacts"><div id="go" class="lact"></div><div id="fresh" class="lact"></div></div>
       <div id="host" class="lacts" hidden></div>
       <p id="full" hidden>4 of 4 · this room is full</p>
@@ -184,7 +254,7 @@ ${nt}`;Ze.test(B)&&(We(j),j=setTimeout(Ce,Bu),Xe(j))},Oe=()=>{h.iceGatheringStat
 */
 </script>
 <script>
-/* ONAROOM v16. Parts of this file are ported from Bencho blocks (Magnetic select, Tilt card, Aspect ratio, Eye tracker, Card swap):
+/* ONAROOM v20. Parts of this file are ported from Bencho blocks (Magnetic select, Tilt card, Aspect ratio, Eye tracker, Card swap):
    MIT License · Copyright (c) 2026 Lorenzo Cabra · https://bencho.dev/licence
    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
    to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
@@ -247,7 +317,8 @@ const DEFCFG = { n: 9, t: 0, s: 0 };
 function parseCfg(code) { const m = /-([3-9abc])([0-5])([0-3])$/.exec(code || ''); return m ? { n: parseInt(m[1], 36), t: +m[2], s: +m[3] } : Object.assign({}, DEFCFG); }
 const cfgTag = c => c.n.toString(36) + c.t + c.s;
 let CFG = parseCfg((location.hash || '').slice(1).toLowerCase());
-const THEME = () => THEMES[CFG.t] || THEMES[0], SHAPE = () => SHAPES[CFG.s] || SHAPES[0];
+const THEME = () => Object.assign({}, THEMES[CFG.t] || THEMES[0], { say: '#ffff00', sh: 'rs', ink: '#000' }),   // yellow game text everywhere
+  SHAPE = () => SHAPES[CFG.s] || SHAPES[0];
 // how far out a point is, measured in the room's own shape (a circle, a rounded square, an oval or a rounded rectangle)
 function shapeF(c, s, S) { S = S || SHAPE(); return Math.pow(Math.pow(Math.abs(c) / S.a, S.p) + Math.pow(Math.abs(s) / S.b, S.p), 1 / S.p); }
 function rho(x, z) { const r = Math.hypot(x, z); return r < 1e-6 ? 0 : r * shapeF(x / r, z / r); }
@@ -316,9 +387,9 @@ const SKYU = ['top', 'mid', 'hor', 'low'], skyGoal = SKIES[0].c.map(c => c.clone
 const sheen = new THREE.Mesh(new THREE.CircleGeometry(R0, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: .045, depthWrite: false })); sheen.position.y = .02; scene.add(sheen);
 // the mirror: everything that floats gets a twin below
 const TWINS = [];
-function twinSprite(s, tint) { const m = s.material.clone(); m.depthTest = false; m.color = (m.color || new THREE.Color('#fff')).clone().multiply(tint || MIRROR_TINT); const t = new THREE.Sprite(m); scene.add(t); TWINS.push([s, t]); return t; }
+function twinSprite(s, tint) { const m = s.material.clone(); m.depthTest = false; if (s.material.isShaderMaterial) { m.uniforms = Object.assign({}, s.material.uniforms, { uTint: { value: (tint || MIRROR_TINT).clone() }, opacity: { value: 1 } }); m.rotation = 0; } else m.color = (m.color || new THREE.Color('#fff')).clone().multiply(tint || MIRROR_TINT); const t = new THREE.Sprite(m); scene.add(t); TWINS.push([s, t]); return t; }
 function unTwin(s) { const i = TWINS.findIndex(p => p[0] === s); if (i >= 0) { scene.remove(TWINS[i][1]); TWINS.splice(i, 1); } }
-function syncTwins() { for (const [s, t] of TWINS) { t.position.set(s.position.x, -s.position.y, s.position.z); t.scale.set(s.scale.x, -s.scale.y, s.scale.z); t.visible = s.visible && s.position.y > -1 && rho(s.position.x, s.position.z) < R0 + 30; t.material.opacity = s.material.opacity; t.material.rotation = -s.material.rotation; } }
+function syncTwins() { for (const [s, t] of TWINS) { t.position.set(s.position.x, -s.position.y, s.position.z); t.scale.set(s.scale.x, -s.scale.y, s.scale.z); t.visible = s.visible && s.position.y > -1 && rho(s.position.x, s.position.z) < R0 + 30; t.material.opacity = s.material.opacity; if (t.material.uniforms) t.material.uniforms.opacity.value = s.material.opacity; t.material.rotation = -s.material.rotation; } }
 
 
 /* ---------- the ring of 9 windows: see the windows section below ---------- */
@@ -349,12 +420,31 @@ function orbTex(S) {
   return new THREE.CanvasTexture(c);
 }
 const ORBTEX = SEATS.map(orbTex);
+/* ---------- the orb body: a ball of light. Threads of energy turn inside it, a bright core leans toward where you look,
+   the rim glows, one small shine sits top left. One shader for the world, its mirror twin, and the landing. ---------- */
+const ORB_T = { value: 0 };
+const ORB_FS = "precision highp float;\nuniform float uTime, opacity, uSpin, uSwipe, uDir, uBody, uLevel, uSeed, uFil, uSpark, uCore, uRim, uSpd, uCloud, uShine, uIri, uDetail, uExpo, uKnee;\nuniform vec3 uA, uB, uC, uA2, uB2, uC2, uTint;\nuniform vec2 uLook, uSquash;\nvarying vec2 vUv;\nfloat hsh(vec3 p){ p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }\nfloat nse(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);\n  return mix(mix(mix(hsh(i), hsh(i + vec3(1,0,0)), f.x), mix(hsh(i + vec3(0,1,0)), hsh(i + vec3(1,1,0)), f.x), f.y),\n             mix(mix(hsh(i + vec3(0,0,1)), hsh(i + vec3(1,0,1)), f.x), mix(hsh(i + vec3(0,1,1)), hsh(i + vec3(1,1,1)), f.x), f.y), f.z); }\nfloat fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++){ s += a * nse(p); p = p * 2.03 + vec3(1.7, 9.2, 3.1); a *= 0.5; } return s; }\nvoid main(){\n  vec2 q = (vUv - 0.5) / uBody; q /= uSquash; float r = length(q);\n  float sw = smoothstep(-0.35, 0.35, (uSwipe + uDir * q.x * 0.5) * 2.0);\n  vec3 A = mix(uA, uA2, sw), B = mix(uB, uB2, sw), C = mix(uC, uC2, sw);\n  float halo = exp(-max(r - 1.0, 0.0) * 2.6) * (0.4 + 0.45 * uLevel) * (1.0 - smoothstep(1.0, 0.48 / uBody, r));\n  vec3 col = mix(B, A, 0.4); float a = halo;\n  if (r < 1.0) {\n    vec3 n = vec3(q, sqrt(1.0 - r * r));\n    float ang = uTime * 0.35 * uSpd + uSpin, c = cos(ang), s = sin(ang);\n    vec3 p = vec3(c * n.x + s * n.z, n.y * 0.96 + n.z * 0.28, -s * n.x + c * n.z) + uSeed;\n    vec3 wp = p * 1.6 + vec3(0.0, uTime * 0.12 * uSpd, 0.0); float w = mix(nse(wp * 0.8) * 0.7 + nse(wp * 1.6 + 3.1) * 0.3, fbm(wp), uDetail);   // uDetail 0: only big soft shapes, no fine threads\n    float fil = 0.0, fil2 = 0.0;\n    if (uFil + uSpark > 0.0) { float th = fbm(p * 2.6 + w * 2.2 + uTime * 0.05 * uSpd); fil = pow(1.0 - abs(th * 2.0 - 1.0), 7.0); fil2 = pow(1.0 - abs(fbm(p * 4.2 + w * 3.0) * 2.0 - 1.0), 12.0); }\n    float depth = n.z;\n    vec3 body = mix(C, B, smoothstep(0.0, 0.95, depth * 0.7 + (w - 0.5) * uCloud + 0.28));\n    vec3 alt = mix(body, body.gbr, 0.55); alt *= dot(body, vec3(0.333)) / max(dot(alt, vec3(0.333)), 0.001);   // shift hue, keep brightness\n    body = mix(body, alt, uIri * smoothstep(0.2, 1.0, w + (1.0 - depth) * 0.6));\n    body = mix(body, B, 0.25);   // keep it in the orb's own colour\n    body += A * fil * uFil + vec3(1.0) * fil2 * uSpark;                       // threads of light\n    vec2 lc = q - uLook * 0.32; float core = exp(-dot(lc, lc) * 9.0);\n    body += mix(A, vec3(1.0), 0.6) * core * uCore * (1.0 + 0.15 * sin(uTime * 2.3)); // the bright core, leaning where you look\n    body += A * pow(1.0 - depth, 2.6) * uRim;                                // glowing rim\n    body += vec3(1.0) * pow(max(dot(n, normalize(vec3(-0.5, 0.6, 0.65))), 0.0), 28.0) * uShine;  // one small shine, top left\n    body += A * uLevel * 0.35;\n    float e = smoothstep(1.0, 0.965, r);\n    col = mix(col, body, e); a = max(e, halo);\n  }\n  col *= uExpo; col = col / (1.0 + col * uKnee);   // softer: lower exposure, highlights rolled off so nothing hits pure white\n  gl_FragColor = vec4(col * uTint, a * opacity);\n}\n";
+const ORB_VS = 'uniform float rotation; varying vec2 vUv; void main(){ vUv = uv; vec4 mv = modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0); vec2 sc = vec2(length(modelMatrix[0].xyz), modelMatrix[1].y); mv.xy += position.xy * sc; gl_Position = projectionMatrix * mv; }';
+// the 24 orbs Sam chose (Nov 21 2026), named by the last digits of their colour. c body colour · a accent (inner light and rim) · s style
+const ORBS = [{"c": "#2377f6", "s": "M", "id": "7f6"}, {"c": "#3fc8ff", "s": "P", "id": "8ff"}, {"c": "#23e1f6", "s": "L", "id": "1f6"}, {"c": "#5ee6d0", "s": "P", "id": "6d0"}, {"c": "#9fffd8", "s": "Q", "id": "fd8"}, {"c": "#b6ff3b", "s": "P", "id": "f3b"}, {"c": "#fff066", "s": "L", "id": "066"}, {"c": "#f6a123", "s": "P", "id": "123"}, {"c": "#e8323c", "a": "#ffd166", "s": "P", "id": "23c"}, {"c": "#f63823", "s": "M", "id": "823"}, {"c": "#a123f6", "s": "L", "id": "3f6"}, {"c": "#3823f6", "s": "P", "id": "3f6b"}, {"c": "#948cd9", "s": "P", "id": "cd9"}, {"c": "#8aa2ff", "s": "L", "id": "2ff"}, {"c": "#da6bff", "s": "L", "id": "bff"}, {"c": "#2277f5", "a": "#5ee6d0", "s": "L", "id": "7f5"}, {"c": "#e23cc8", "a": "#7fe8ff", "s": "P", "id": "cc8"}, {"c": "#4a3aff", "a": "#5ee6d0", "s": "P", "id": "aff"}, {"c": "#1b2f8a", "a": "#7fe8ff", "s": "M", "id": "f8a"}, {"c": "#8cabd9", "s": "L", "id": "bd9"}, {"c": "#8fd3ff", "s": "L", "id": "3ff"}, {"c": "#2fd65a", "a": "#ffe27a", "s": "P", "id": "65a"}, {"c": "#23f638", "s": "P", "id": "638"}, {"c": "#ffb08a", "s": "Q", "id": "08a"}];
+// styles: all soft, no fine threads. L soft aurora · M velvet · N dusk glow · O lagoon · P breath · Q moonstone
+const ORB_ST = { L: { uCore: .45, uRim: .45, uSpd: .35, uCloud: .8, uShine: .25, uIri: .6, uExpo: 1.0, uKnee: .25 }, M: { uCore: .4, uRim: .35, uSpd: .35, uCloud: .6, uShine: .12, uIri: .3, uExpo: 1.0, uKnee: .3 },
+  N: { uCore: .6, uRim: .35, uSpd: .35, uCloud: .55, uShine: .18, uIri: .45, uExpo: .95, uKnee: .25 }, O: { uCore: .4, uRim: .4, uSpd: .35, uCloud: .9, uShine: .18, uIri: .9, uExpo: 1.0, uKnee: .25 },
+  P: { uCore: .5, uRim: .45, uSpd: .55, uCloud: 1.0, uShine: .22, uIri: .4, uExpo: 1.0, uKnee: .25 }, Q: { uCore: .35, uRim: .6, uSpd: .3, uCloud: .45, uShine: .3, uIri: .7, uExpo: 1.05, uKnee: .35 } };
+const orbOf = hex => ORBS.find(o => o.c === String(hex).toLowerCase()) || { c: hex, s: 'P' };
+function orbCols(hex) { const o = orbOf(hex), P = palOf(o.c), A = o.a ? new THREE.Color(palOf(o.a).g[0]).lerp(new THREE.Color(o.a), .4) : new THREE.Color(P.g[0]).lerp(new THREE.Color(P.g[1]), .35); return [A, new THREE.Color(P.g[1]), new THREE.Color(P.g[2]).multiplyScalar(.7)]; }
+function orbStyle(u, hex) { const st = ORB_ST[orbOf(hex).s] || ORB_ST.P; for (const k in st) { if (u[k]) u[k].value = st[k]; else u[k] = { value: st[k] }; } u.uFil = u.uFil || { value: 0 }; u.uSpark = u.uSpark || { value: 0 }; u.uDetail = u.uDetail || { value: 0 }; return u; }
+let orbUniforms = function (hex, body) { const [a, b, c] = orbCols(hex); return { uTime: ORB_T, opacity: { value: 1 }, uA: { value: a }, uB: { value: b }, uC: { value: c }, uA2: { value: a.clone() }, uB2: { value: b.clone() }, uC2: { value: c.clone() },
+  uTint: { value: new THREE.Color('#ffffff') }, uLook: { value: new THREE.Vector2() }, uSquash: { value: new THREE.Vector2(1, 1) }, uSpin: { value: 0 }, uSwipe: { value: -2 }, uDir: { value: 1 }, uBody: { value: body }, uLevel: { value: 0 }, uSeed: { value: Math.random() * 9 } }; }
+const _ou = orbUniforms; orbUniforms = (hex, body) => orbStyle(_ou(hex, body), hex);
+function orbMaterial(hex) { const m = new THREE.ShaderMaterial({ uniforms: orbUniforms(hex, .234), vertexShader: ORB_VS, fragmentShader: ORB_FS, transparent: true, depthWrite: false }); m.rotation = 0; return m; }
+function orbRecolor(m, hex) { const [a, b, c] = orbCols(hex), u = m.uniforms; orbStyle(u, hex); u.uA.value.copy(a); u.uB.value.copy(b); u.uC.value.copy(c); u.uA2.value.copy(a); u.uB2.value.copy(b); u.uC2.value.copy(c); }
 // any colour: a palette made from one hex (lite, colour, deep, rim light), as BLUE42's four seats are
 function palOf(hex) { const c = new THREE.Color(hex), h = {}; c.getHSL(h); const f = (s, l) => '#' + new THREE.Color().setHSL(h.h, clamp(s, 0, 1), clamp(l, 0, 1)).getHexString();
   return { css: '#' + c.getHexString(), glow: [c.r, c.g, c.b].map(v => Math.round(v * 255)).join(','), g: [f(h.s * .9, Math.min(.86, h.l + .24)), f(h.s, h.l), f(h.s, h.l * .55), f(h.s * .8, Math.min(.93, h.l + .34))] }; }
 const ORBC = new Map(); function orbTexFor(hex) { let t = ORBC.get(hex); if (!t) { t = orbTex(palOf(hex)); ORBC.set(hex, t); } return t; }
 const colOf = A => A.col || SEATS[Math.max(0, A.seat || 0)].css;
-function setColor(A, hex) { if (!/^#[0-9a-f]{6}$/i.test(hex || '') || A.col === hex) return; A.col = hex; A.sp.material.map = orbTexFor(hex); A.sp.material.needsUpdate = true; const t = TWINS.find(p => p[0] === A.sp); if (t) { t[1].material.map = A.sp.material.map; t[1].material.needsUpdate = true; } A.halo.material.color.set(hex); if (A.ring) A.ring.material.color.set(hex); }
+function setColor(A, hex) { if (!/^#[0-9a-f]{6}$/i.test(hex || '') || A.col === hex) return; A.col = hex; orbRecolor(A.sp.material, hex); A.halo.material.color.set(hex); if (A.ring) A.ring.material.color.set(hex); }
 const HALO = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d'), g = x.createRadialGradient(64, 64, 0, 64, 64, 64);
   [[0, 0], [.42, 0], [.5, .55], [.62, .3], [1, 0]].forEach(([o, a]) => g.addColorStop(o, 'rgba(255,255,255,' + a + ')')); x.fillStyle = g; x.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c); })();
 function textSprite(txt, o) {
@@ -368,19 +458,20 @@ function textSprite(txt, o) {
 function dropSprite(s) { if (!s) return; scene.remove(s); unTwin(s); s.material.map.dispose(); s.material.dispose(); }
 // an avatar: the orb, its twin, a halo when it talks, a name, a bubble for typed words
 function makeAvatar(seat) {
-  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: ORBTEX[seat], transparent: true, depthWrite: false })); sp.scale.setScalar(3.2); scene.add(sp); twinSprite(sp, new THREE.Color('#d6e2f6'));
+  const sp = new THREE.Sprite(orbMaterial(SEATS[seat].css)); sp.scale.setScalar(3.2); scene.add(sp); twinSprite(sp, new THREE.Color('#d6e2f6'));
   const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: HALO, color: SEATS[seat].css, transparent: true, depthWrite: false, opacity: 0, blending: THREE.AdditiveBlending })); scene.add(halo);
   return { sp, halo, seat, label: null, bubble: null, name: '', msg: '', msgT: 0, pos: new V3(), target: new V3(), level: 0, ph: Math.random() * TAU, have: false, vid: {}, stream: {} };
 }
-function setSeat(A, seat) { if (A.seat === seat) return; A.seat = seat; if (A.col) return; A.sp.material.map = ORBTEX[seat]; A.sp.material.needsUpdate = true; const t = TWINS.find(p => p[0] === A.sp); if (t) { t[1].material.map = ORBTEX[seat]; t[1].material.needsUpdate = true; } A.halo.material.color.set(SEATS[seat].css); A.name = '\u0000'; }
-function setLabel(A, name) { if (A.mine) { A.name = name; return; } if (A.name === name) return; A.name = name; dropSprite(A.label); A.label = textSprite(name || SEATS[A.seat].n, { size: 30, k: .016 }); scene.add(A.label); }
+function setSeat(A, seat) { if (A.seat === seat) return; A.seat = seat; if (A.col) return; orbRecolor(A.sp.material, SEATS[seat].css); A.halo.material.color.set(SEATS[seat].css); A.name = '\u0000'; }
+function setLabel(A, name) { if (A.mine) { A.name = name; return; } if (A.name === name) return; A.name = name; dropSprite(A.label); A.label = textSprite(name || SEATS[A.seat].n, { size: 30, k: .016, fg: A.tc || '#ffff00', rs: 1, ink: '#000', w: 700 }); scene.add(A.label); }
 function setBubble(A, msg) { const cur = A.bubble && A.bubble.userData.txt; if (cur === msg) return; dropSprite(A.bubble); A.bubble = null; if (msg) { A.bubble = textSprite(msg, { size: 34, fg: THEME().say, rs: THEME().sh === 'rs', ink: THEME().ink, w: 700, pad: 10, k: .013 }); scene.add(A.bubble); } }
-function removeAvatar(A) { scene.remove(A.sp); unTwin(A.sp); scene.remove(A.halo); dropSprite(A.label); dropSprite(A.bubble); }
+function removeAvatar(A) { if (A.hum) { try { A.hum.o.stop(); A.hum.p.disconnect(); } catch (e) {} A.hum = null; } scene.remove(A.sp); unTwin(A.sp); scene.remove(A.halo); dropSprite(A.label); dropSprite(A.bubble); }
 const SCALE = { label: 1, orb: 1 };
-const FORM = { k: 1, on: false, t: 0 }; // your orb's size while it forms on float-in
+const FORM = { k: 1, on: false, t: 0, pin: null, snap: false, O: null }; // your orb's size while it forms on float-in
 function placeAvatar(A, p, dt) {
-  const bob = MOT ? Math.sin(time * 2.1 + A.ph) * .25 : 0, k = SCALE.orb;
-  A.sp.position.set(p.x, p.y + bob, p.z); const fk = A.mine ? FORM.k : 1; A.sp.scale.setScalar(3.2 * k * (1 + A.level * .12) * fk);
+  const forming = A.mine && FORM.on, bob = MOT && !forming ? Math.sin(time * 2.1 + A.ph) * .25 : 0, k = SCALE.orb;
+  A.sp.position.set(p.x, p.y + bob, p.z); const fk = forming ? .9 + .1 * Math.min(1, FORM.k) + Math.max(0, FORM.k - 1) : 1; A.sp.scale.setScalar(3.2 * k * (1 + A.level * .12) * fk);
+  const U = A.sp.material.uniforms; if (U) { U.opacity.value = A.sp.material.opacity * (forming ? clamp(FORM.k, 0, 1) : 1); U.uLevel.value = A.level; }   // while forming it fades in where it stands
   A.halo.position.copy(A.sp.position); A.halo.scale.setScalar(3.2 * k * (1.5 + A.level * 1.6)); A.halo.material.opacity = Math.min(1, A.level * 2.2);
   if (A.label) { A.label.position.set(p.x, p.y + (A.bubble ? 3.2 : 2.4) * k, p.z); const s = A.label.userData, near = clamp(camera.position.distanceTo(p) / 30, .3, 1); A.label.scale.set(s.w * s.k * SCALE.label * near, s.h * s.k * SCALE.label * near, 1); A.label.material.opacity = clamp(1.6 - camera.position.distanceTo(p) / (220 * SCALE.label), .25, 1); }
   if (A.bubble) { A.bubble.position.set(p.x, p.y + 2.05 * k, p.z); const s = A.bubble.userData; A.bubble.scale.set(s.w * s.k * SCALE.label, s.h * s.k * SCALE.label, 1); }
@@ -400,16 +491,16 @@ const keys = new Set();
 let started = false, view = 'follow', viewK = 0, time = 0, beganAt = 0;
 
 /* ---------- sound: BLUE42's orb engine, and the voices ---------- */
-let ac = null, master, verbIn, voiceBus, ENG = null;
+let ac = null, master, verbIn, voiceBus, ENG = null, WORLD = null;
 function impulse(sec) { const n = Math.floor(ac.sampleRate * sec), b = ac.createBuffer(2, n, ac.sampleRate); for (let c = 0; c < 2; c++) { const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3.2); } return b; }
 function startAudio() {
   if (ac) { if (ac.state !== 'running') ac.resume().catch(() => {}); return; }
   const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
   try {
     ac = new AC();
-    master = ac.createGain(); master.gain.value = .85; const comp = ac.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 5; master.connect(comp); comp.connect(ac.destination);
+    master = ac.createGain(); master.gain.value = .85 * VOL.master; const comp = ac.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 5; master.connect(comp); comp.connect(ac.destination);
     const verb = ac.createConvolver(); verb.buffer = impulse(4.5); verbIn = ac.createGain(); const wet = ac.createGain(); wet.gain.value = .4; verbIn.connect(verb); verb.connect(wet); wet.connect(master);
-    voiceBus = ac.createGain(); voiceBus.gain.value = 1.5 * VOL.all; voiceBus.connect(ac.destination);   // voices skip the compressor, so they stay clear
+    voiceBus = ac.createGain(); voiceBus.gain.value = 1.5 * VA(); voiceBus.connect(ac.destination);   // voices skip the compressor, so they stay clear
     // the orb's engine: silent when still, it swells and opens as you fly
     const out = ac.createGain(); out.gain.value = 0; out.connect(master); const es = ac.createGain(); es.gain.value = .3; out.connect(es); es.connect(verbIn);
     const pulse = ac.createGain(); pulse.gain.value = .7; pulse.connect(out);
@@ -421,6 +512,13 @@ function startAudio() {
     const parts = [[2, .2, 'triangle'], [2.5, .16, 'triangle'], [3, .14, 'triangle'], [4, .09, 'sine'], [5, .06, 'sine']].map(([r, g, ty], i) => {
       const o = ac.createOscillator(), og = ac.createGain(); o.type = ty; o.detune.value = (i % 2 ? 1 : -1) * 3; og.gain.value = g; o.connect(og); og.connect(shine); o.start(); return { o, r }; });
     ENG = { out, rpm, body, growl, sub, shine, parts };
+    // the world: a soft rush near the waterfall, air when you fly high or fast
+    const nb = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate), nd = nb.getChannelData(0); let br = 0; for (let i = 0; i < nd.length; i++) { br = br * .97 + (Math.random() * 2 - 1) * .03; nd[i] = br * 3.5; }
+    const ns = ac.createBufferSource(); ns.buffer = nb; ns.loop = true;
+    const fallF = ac.createBiquadFilter(); fallF.type = 'lowpass'; fallF.frequency.value = 900; const fallG = ac.createGain(); fallG.gain.value = 0;
+    const airF = ac.createBiquadFilter(); airF.type = 'bandpass'; airF.frequency.value = 1200; airF.Q.value = .6; const airG = ac.createGain(); airG.gain.value = 0;
+    ns.connect(fallF); fallF.connect(fallG); fallG.connect(master); ns.connect(airF); airF.connect(airG); airG.connect(master); ns.start();
+    WORLD = { fallG, airG, airF };
   } catch (e) { ac = null; }
 }
 function engineFrame() {
@@ -429,7 +527,19 @@ function engineFrame() {
   ENG.out.gain.setTargetAtTime(on * .045 * VOL.orb * (TALKING() ? .35 : 1), t, .15); ENG.rpm.frequency.setTargetAtTime(3 + v * 9, t, .15);
   ENG.growl.frequency.setTargetAtTime(f0, t, .12); ENG.sub.frequency.setTargetAtTime(f0 / 2, t, .12); ENG.body.frequency.setTargetAtTime(380 + v * 900, t, .15); ENG.shine.frequency.setTargetAtTime(700 + v * 2600, t, .15);
   for (const p of ENG.parts) p.o.frequency.setTargetAtTime(f0 * 2 * p.r, t, .12);
+  if (WORLD) { const e = sm(R0 - 30, R1 - 30, rho(pos.x, pos.z)), hi = sm(200, 700, pos.y), sp = clamp(mv.speed / 60, 0, 1);
+    WORLD.fallG.gain.setTargetAtTime(e * .05 * VOL.world, t, .3); WORLD.airG.gain.setTargetAtTime((hi * .5 + sp * .5) * .02 * VOL.world, t, .3); WORLD.airF.frequency.setTargetAtTime(900 + sp * 1600, t, .3); }
+  // other people's orbs: a small hum each, from where they are, louder as they move
+  for (const [, A] of OTHERS) {
+    if (!A.have || !A.placed || !A.sp.visible) { if (A.hum) A.hum.g.gain.setTargetAtTime(0, t, .2); continue; }
+    if (!A.hum) A.hum = orbHum(); const H = A.hum, dtt = Math.max(1e-3, t - H.lt); if (H.last) H.v = lerp(H.v, clamp(A.pos.distanceTo(H.last) / dtt / 40, 0, 1.6), .2); H.last = (H.last || new V3()).copy(A.pos); H.lt = t;
+    const P = H.p; if (P.positionX) { P.positionX.setValueAtTime(A.pos.x, t); P.positionY.setValueAtTime(A.pos.y, t); P.positionZ.setValueAtTime(A.pos.z, t); } else P.setPosition(A.pos.x, A.pos.y, A.pos.z);
+    P.rolloffFactor = VOL.prox ? 1 : 0;
+    H.g.gain.setTargetAtTime(sm(.02, .25, H.v) * .03 * VOL.others, t, .15); H.o.frequency.setTargetAtTime(55 * Math.pow(2, H.v * 7 / 12), t, .12); H.f.frequency.setTargetAtTime(300 + H.v * 700, t, .15);
+  }
 }
+function orbHum() { const o = ac.createOscillator(), f = ac.createBiquadFilter(), g = ac.createGain(), p = ac.createPanner(); o.type = 'sawtooth'; f.type = 'lowpass'; f.frequency.value = 400; g.gain.value = 0;
+  p.panningModel = 'HRTF'; p.distanceModel = 'inverse'; p.refDistance = 25; p.rolloffFactor = 1; o.connect(f); f.connect(g); g.connect(p); p.connect(master); o.start(); return { o, f, g, p, last: null, lt: 0, v: 0 }; }
 const _lf = new V3(), _lu = new V3();
 function listen() {
   if (!ac) return; const L = ac.listener, p = camera.position, f = _lf.set(0, 0, -1).applyQuaternion(camera.quaternion), u = _lu.set(0, 1, 0).applyQuaternion(camera.quaternion);
@@ -442,31 +552,88 @@ const CODE_RE = /^[a-z0-9-]{3,32}$/;
 function newCode() { const w = ['sky', 'blue', 'orb', 'mirror', 'cloud', 'halo', 'drift', 'glass']; return w[Math.floor(Math.random() * w.length)] + '-' + Math.random().toString(36).slice(2, 6); }
 let CODE = (location.hash || '').slice(1).toLowerCase();
 if (!CODE_RE.test(CODE)) CODE = 'lobby';   // the plain link is one shared room, so a pasted link without a code still brings everyone together
+// the lobby is call mode: a plain blue space seen from above, just the orbs, everyone heard at full volume. Rooms keep the whole world
+const LOBBY = CODE === 'lobby';
 $('lroom').textContent = CODE === 'lobby' ? 'lobby' : CODE;
 addEventListener('hashchange', () => { const h = (location.hash || '').slice(1).toLowerCase() || 'lobby'; if (h !== CODE && CODE_RE.test(h)) location.reload(); });
 function freshRoom() { try { sessionStorage.setItem('onaroom.host', '1'); } catch (e) {} location.hash = newCode(); location.reload(); }
 const roomWith = c => newCode() + '-' + cfgTag(c);
-function goRoom(c) { location.hash = roomWith(c); location.reload(); }
+function goRoom(c) { try { sessionStorage.setItem('onaroom.autoin', myCol); } catch (e) {} location.hash = roomWith(c); location.reload(); }   // a new room you just made: you float straight in
 
 let room = null, selfId = '', mySeat = -1, myName = '', netOK = false, roomFull = false;
 const OTHERS = new Map();   // peerId -> avatar
 let A_hi, A_pos, A_say, A_cam, A_want, A_sky, A_scr, A_win, A_wins;
 const clean = (s, n) => String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f\u200b-\u200f\u2028-\u202e\u2060-\u206f]/g, '').trim().slice(0, n);
 let joinedAt = 0;
-const hiMsg = () => ({ n: myName, s: mySeat, t: joinedAt, m: me.msg || '', c: camStream ? 1 : 0, sc: scrStream ? 1 : 0, g: -1, k: myCol, sk: myS || 0 });
+const TCOLS = ['#ffff00', '#ff3030', '#00ff66', '#00ffff', '#ff55ff', '#ffffff'];
+let TC = '#ffff00'; try { const c = localStorage.getItem('onaroom.tc'); if (TCOLS.includes(c)) TC = c; } catch (e) {}
+const hiMsg = () => ({ tc: TC, n: myName, s: mySeat, t: joinedAt, m: me.msg || '', c: camStream ? 1 : 0, sc: scrStream ? 1 : 0, g: -1, k: myCol, sk: myS || 0 });
 function usedSeats() { const u = new Set(); for (const [, A] of OTHERS) if (A.have && A.seat >= 0) u.add(A.seat); return u; }
 function pickSeat() { const u = usedSeats(); if (!u.has(prefSeat)) return prefSeat; for (let i = 0; i < MAX; i++) if (!u.has(i)) return i; return 0; }
 function takeSeat(s, spawn) {
   mySeat = s; setSeat(me, s); setLabel(me, myName || SEATS[s].n);
-  if (spawn) { pos.set(PADS[s].x * .95, 3.2, PADS[s].z * .95); mv.yaw = Math.atan2(-PADS[s].x, PADS[s].z); camera.position.set(pos.x - Math.sin(mv.yaw) * 14, 7.6, pos.z + Math.cos(mv.yaw) * 14); }
+  if (spawn) { if (LOBBY) pos.set(PADS[s].x * .03, 3.2, PADS[s].z * .03); else pos.set(PADS[s].x * .95, 3.2, PADS[s].z * .95); mv.yaw = Math.atan2(-PADS[s].x, PADS[s].z); camera.position.set(pos.x - Math.sin(mv.yaw) * 14, 7.6, pos.z + Math.cos(mv.yaw) * 14); }
   if (A_hi) A_hi.send(hiMsg()).catch(() => {}); seatsUI();
 }
+/* ---------- keeping the room together ----------
+   Every few seconds each orb tells its direct neighbours who it can reach. The steadiest device in the room
+   (a computer before a phone, then whoever came first) becomes the hub: if two people can't reach each other
+   directly, the hub passes their moves, words, windows and voices along. Nothing changes when everyone can reach everyone. */
+let A_fwd = null, A_see = null;
+const NET = { H: null, RELAYED: new Set(['hi', 'pos', 'say', 'cam', 'sky', 'scr', 'win']), STR: new Map(), SENT: new Set(), t: 0, away: 0, lost: 0 };
+const MYDV = matchMedia('(pointer: fine)').matches && !/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 1 : 0;   // 1 = a computer
+const blocked = id => Array.isArray(window.__RELAYS) && window.__BLOCK === id;   // local test hook only: pretend this direct link failed
+function directIds() { const r = []; for (const [id, A] of OTHERS) if (A.direct && !blocked(id)) r.push(id); return r; }
+function seeSend(target) { if (A_see) A_see.send({ ln: directIds(), dv: MYDV, t: joinedAt }, target ? { target } : undefined).catch(() => {}); }
+const better = (a, b) => { for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] < b[i]; return false; };
+function hubId() {   // the one who reaches the most people, then a computer before a phone, then whoever came first
+  let best = selfId, bs = [-directIds().length, MYDV ? 0 : 1, joinedAt || 9e15, 0];
+  for (const [id, A] of OTHERS) { if (!A.direct || !A.ln) continue; const sc = [-A.ln.size, A.dv ? 0 : 1, A.jt || 9e15, id < selfId ? -1 : 1]; if (better(sc, bs)) { best = id; bs = sc; } } return best; }
+function hubPass(name, d, from) {   // only the hub passes things on, and only to those who can't hear the sender directly
+  if (!A_fwd || !selfId || !NET.RELAYED.has(name) || hubId() !== selfId) return;
+  for (const [id, A] of OTHERS) if (id !== from && A.direct && !blocked(id) && A.ln && !A.ln.has(from)) { NET.fout = (NET.fout || 0) + 1; A_fwd.send({ o: from, a: name, d }, { target: id }).catch(() => {}); }
+}
+// lobby call mode: only the orbs (and their names and words) are drawn, over a soft blue gradient
+let LOBBG = null; const KEEP = new Set();
+function lobbyView() {
+  if (!LOBBG) { const c = document.createElement('canvas'); c.width = 4; c.height = 256; const x = c.getContext('2d'), g = x.createLinearGradient(0, 0, 0, 256); g.addColorStop(0, '#7fb2ff'); g.addColorStop(.55, '#4f86e8'); g.addColorStop(1, '#2c4fb0'); x.fillStyle = g; x.fillRect(0, 0, 4, 256); LOBBG = new THREE.CanvasTexture(c); scene.background = LOBBG; }
+  KEEP.clear(); for (const A of [me, ...OTHERS.values()]) for (const o of [A.sp, A.halo, A.label, A.bubble, A.ring]) if (o) KEEP.add(o);
+  for (const o of scene.children) if (!KEEP.has(o) && !o.isCamera && !o.isLight) o.visible = false;
+}
+function hubFrame(dt) {
+  if (!room) return; NET.t += dt; if (NET.t < 2.5) return; NET.t = 0; seeSend();
+  const now = performance.now();
+  // people only known through the hub fade out if the hub stops hearing them
+  for (const [id, A] of [...OTHERS]) if (!A.direct && A.seen && now - A.seen > 9000) dropPeer(id);
+  // the hub passes voices and screens along too
+  if (hubId() === selfId) for (const [key, st] of NET.STR) { const [from, kind] = key.split(':'); if (!OTHERS.has(from) || !st.active) { NET.STR.delete(key); continue; }
+    for (const [id, A] of OTHERS) { const k = key + '>' + id; if (id === from || !A.direct || blocked(id) || !A.ln || A.ln.has(from) || NET.SENT.has(k)) continue; NET.SENT.add(k); room.addStream(st, { target: id, metadata: { kind, o: from } }).catch(() => NET.SENT.delete(k)); } }
+}
+// coming back: if the phone slept or the network dropped, rejoin the same room
+function dropPeer(peerId) {
+  WATCH.delete(peerId); camBadge(); const A = OTHERS.get(peerId); if (!A) return;
+  closeFeedsOf(A); winPeerLeft(peerId);
+  if (A.ring) scene.remove(A.ring); if (A.have) note(A, 'floated off'); removeAvatar(A);
+  if (A.v) { try { A.v.g.disconnect(); A.v.pan.disconnect(); } catch (e) {} } if (A.el) { A.el.srcObject = null; }
+  OTHERS.delete(peerId); seatsUI(); aimSky(); menuRefresh();
+  for (const k of [...NET.STR.keys()]) if (k.startsWith(peerId + ':')) NET.STR.delete(k); for (const k of [...NET.SENT]) if (k.startsWith(peerId + ':') || k.endsWith('>' + peerId)) NET.SENT.delete(k);
+}
+function rejoin(why) { if (!room || NET.busy) return; NET.busy = 1; try { room.leave(); } catch (e) {} for (const id of [...OTHERS.keys()]) dropPeer(id); room = null; NET.STR.clear(); NET.SENT.clear();
+  setTimeout(() => { NET.busy = 0; connect(); if (started && A_hi) setTimeout(() => A_hi.send(hiMsg()).catch(() => {}), 800); }, 400); }
+addEventListener('online', () => { if (NET.lost) { NET.lost = 0; rejoin('online'); } });
+addEventListener('offline', () => { NET.lost = 1; });
+document.addEventListener('visibilitychange', () => { if (document.hidden) { NET.away = performance.now(); return; } if (room && started && performance.now() - NET.away > 20000) rejoin('woke'); else if (A_hi && started) A_hi.send(hiMsg()).catch(() => {}); });
 function connect() {
   if (!window.Trystero || !window.RTCPeerConnection) { tip('This copy is offline: open it from its GitHub link to fly together.', 6000); return; }
   try { const cfg = { appId: APP, maxUsers: MAX, identity: 'none' }; if (Array.isArray(window.__RELAYS)) cfg.relayConfig = { urls: window.__RELAYS }; room = Trystero.joinRoom(cfg, CODE); } catch (e) { room = null; tip('Could not reach the sky network. Flying solo.', 6000); return; }
   netOK = true; connectedAt = performance.now();
-  A_hi = room.makeAction('hi'); A_pos = room.makeAction('pos'); A_say = room.makeAction('say'); A_cam = room.makeAction('cam'); A_want = room.makeAction('want'); A_sky = room.makeAction('sky');
-  A_scr = room.makeAction('scr'); A_win = room.makeAction('win'); A_wins = room.makeAction('wins');
+  const H = {}, mk = name => { const a = room.makeAction(name), on = f => a.onMessage(f); return { send: (d, o) => a.send(d, o), onMessage: f => { H[name] = f; return on((d, meta) => { if (blocked(meta.peerId)) return; const A = OTHERS.get(meta.peerId); if (A) { A.via = null; A.seen = performance.now(); } f(d, meta); hubPass(name, d, meta.peerId); }); } }; };   // every action passes through here, so the hub can pass it on
+  NET.H = H;
+  A_fwd = room.makeAction('fwd'); A_see = room.makeAction('see');
+  A_fwd.onMessage((d, { peerId }) => { if (blocked(peerId) || !d || typeof d.o !== 'string' || d.o === selfId || !NET.RELAYED.has(d.a) || !H[d.a]) return; const A = other(d.o); if (OTHERS.get(d.o) && !A.direct) { A.via = peerId; A.seen = performance.now(); } NET.fin = (NET.fin || 0) + 1; try { H[d.a](d.d, { peerId: d.o, metadata: null }); } catch (e) { NET.ferr = String(e); } });
+  A_see.onMessage((d, { peerId }) => { if (blocked(peerId) || !d || !Array.isArray(d.ln)) return; const A = other(peerId); A.ln = new Set(d.ln.filter(x => typeof x === 'string').slice(0, 8)); A.dv = d.dv === 1 ? 1 : 0; A.jt = Number.isFinite(d.t) ? d.t : 0; A.direct = true; });
+  A_hi = mk('hi'); A_pos = mk('pos'); A_say = mk('say'); A_cam = mk('cam'); A_want = room.makeAction('want'); A_sky = mk('sky');
+  A_scr = mk('scr'); A_win = mk('win'); A_wins = room.makeAction('wins');
   A_sky.onMessage((d, { peerId }) => { const A = other(peerId); if (d && okSky(d.c)) { A.s = d.c; A.g = -1; if (A.have) skyLog(A, d.c); } else { A.s = null; A.g = Number.isInteger(d) && d >= 0 && d < SKIES.length ? d : -1; if (A.have && A.g >= 0) skyLog(A, SKIES[A.g].c.map(c => '#' + c.getHexString())); } aimSky(); });
   A_cam.onMessage((d, { peerId }) => setCamFlag(other(peerId), d === true));
   A_scr.onMessage((d, { peerId }) => setScrFlag(other(peerId), d === true));
@@ -481,22 +648,16 @@ function connect() {
   A_wins.onMessage((d, { peerId }) => { if (Array.isArray(d)) d.slice(0, NW).forEach(s => winSnap(s, peerId)); });
   room.getSelf().then(s => { selfId = s.peerId; }).catch(() => {});
   room.onPeerJoin(({ peerId }) => {
-    other(peerId);
+    { const A = other(peerId); A.direct = true; A.via = null; A.seen = performance.now(); } seeSend(peerId);
     if (mySeat >= 0) A_hi.send(hiMsg(), { target: peerId }).catch(() => {});
     if (micStream) room.addStream(micStream, { target: peerId, metadata: { kind: 'mic' } }).catch(() => {});
     if (scrStream) room.addStream(scrStream, { target: peerId, metadata: { kind: 'scr' } }).catch(() => {});
     const snap = winSnapshot(); if (snap.length) A_wins.send(snap, { target: peerId }).catch(() => {});
   });
-  room.onPeerLeave(({ peerId }) => {
-    WATCH.delete(peerId); camBadge(); const A = OTHERS.get(peerId); if (!A) return;
-    closeFeedsOf(A); winPeerLeft(peerId);
-    if (A.ring) scene.remove(A.ring); if (A.have) note(A, 'floated off'); removeAvatar(A);
-    if (A.v) { try { A.v.g.disconnect(); A.v.pan.disconnect(); } catch (e) {} } if (A.el) { A.el.srcObject = null; }
-    OTHERS.delete(peerId); seatsUI(); aimSky(); menuRefresh();
-  });
+  room.onPeerLeave(({ peerId }) => dropPeer(peerId));
   A_hi.onMessage((d, { peerId }) => {
     if (!d || typeof d !== 'object') return; const A = other(peerId), seat = Number.isInteger(d.s) && d.s >= 0 && d.s < MAX ? d.s : -1, name = clean(d.n, 18);
-    const first = !A.have; A.have = seat >= 0; if (seat >= 0) setSeat(A, seat); setLabel(A, name || (seat >= 0 ? SEATS[seat].n : ''));
+    const first = !A.have; A.have = seat >= 0; if (seat >= 0) setSeat(A, seat); { const tc = TCOLS.includes(d.tc) ? d.tc : '#ffff00'; if (tc !== A.tc) { A.tc = tc; A.name = '\u0000'; } } setLabel(A, name || (seat >= 0 ? SEATS[seat].n : ''));
     if (first && A.have) note(A, 'floated in');
     { const m = clean(d.m, 80); if (m !== A.msg) { A.msg = m; setBubble(A, m); } }
     setCamFlag(A, d.c === 1); setScrFlag(A, d.sc === 1);
@@ -514,6 +675,7 @@ function connect() {
   });
   A_say.onMessage((d, { peerId }) => { const A = other(peerId), m = clean(d, 80); A.msg = m; setBubble(A, m); if (m) logLine(A, m); });
   room.onPeerStream((stream, { peerId, metadata }) => {
+    if (metadata && typeof metadata.o === 'string' && metadata.o !== selfId) peerId = metadata.o; else NET.STR.set(peerId + ':' + (metadata && metadata.kind || 'mic'), stream);
     const A = other(peerId), kind = metadata && metadata.kind;
     if (kind === 'scr') { scrArrive(A, stream); return; }
     if (kind === 'cam' || (!kind && stream.getVideoTracks().length && !stream.getAudioTracks().length)) { camArrive(A, stream); return; }
@@ -571,11 +733,11 @@ function attachVoice(A, stream) {
       A.v = { an, g, pan, buf: new Uint8Array(512) }; return;
     } catch (e) {}
   }
-  el.muted = false; el.volume = Math.min(1, pvol(A) * VOL.all); el.play().catch(() => {});
+  el.muted = false; el.volume = Math.min(1, pvol(A) * VA()); el.play().catch(() => {});
 }
 function level(m) { if (!m) return 0; m.an.getByteTimeDomainData(m.buf); let s = 0; for (let i = 0; i < m.buf.length; i++) { const d = (m.buf[i] - 128) / 128; s += d * d; } return Math.sqrt(s / m.buf.length); }
 const inCommons = p => rho(p.x, p.z) < COMMONS;
-function voiceGain(A) { if (presenterIds().has(A.id)) return 1; if (inCommons(pos) && inCommons(A.pos)) return 1; const d = pos.distanceTo(A.pos); return d < 50 ? 1 : clamp(1 - (d - 50) / 700, .12, 1); }
+function voiceGain(A) { if (!VOL.prox || LOBBY) return 1; if (presenterIds().has(A.id)) return 1; if (inCommons(pos) && inCommons(A.pos)) return 1; const d = pos.distanceTo(A.pos); return d < 50 ? 1 : clamp(1 - (d - 50) / 700, .12, 1); }
 
 
 /* ---------- birds: schools of different birds, each on its own path, on a shared clock so everyone sees the same sky ----------
@@ -679,11 +841,17 @@ let myG = -1;
 const _sc = new THREE.Color();
 function skyFrame(dt) { const k = 1 - Math.exp(-dt * 2.2); for (let i = 0; i < 4; i++) skyMat.uniforms[SKYU[i]].value.lerp(_sc.copy(skyGoal[i]).lerp(SPACEC[i], ALT.space * .92), k); }
 /* ---------- volume: your orb's sound, everyone, and each person (lives in the menu's 🔊 tab) ---------- */
-const VOL = { orb: 1, all: 1 };
-try { const s = JSON.parse(localStorage.getItem('onaroom.vol') || '{}'); if (s.orb >= 0 && s.orb <= 1) VOL.orb = s.orb; if (s.all >= 0 && s.all <= 2) VOL.all = s.all; } catch (e) {}
-const saveVol = () => { try { localStorage.setItem('onaroom.vol', JSON.stringify(VOL)); } catch (e) {} };
+// every sound has its own level. Saved on this device only
+const VOL = { master: 1, voices: 1, orb: 1, others: .5, ui: 1, world: .5, prox: 1, win: {} };
+try { const s = JSON.parse(localStorage.getItem('onaroom.vol2') || 'null');
+  if (s) { for (const k of ['master', 'voices', 'orb', 'others', 'ui', 'world', 'prox']) if (typeof s[k] === 'number' && s[k] >= 0 && s[k] <= 2) VOL[k] = s[k]; }
+  else { const o = JSON.parse(localStorage.getItem('onaroom.vol') || '{}'); if (o.orb >= 0 && o.orb <= 1) VOL.orb = o.orb; if (o.all >= 0 && o.all <= 2) VOL.voices = o.all; } } catch (e) {}
+const saveVol = () => { try { localStorage.setItem('onaroom.vol2', JSON.stringify(Object.assign({}, VOL, { win: {} }))); } catch (e) {} };
+const VA = () => VOL.voices * VOL.master;
 const pvol = A => A.mute ? 0 : (A.vol == null ? 1 : A.vol);
-function setAll() { if (voiceBus && ac) voiceBus.gain.setTargetAtTime(1.5 * VOL.all, ac.currentTime, .05); for (const [, A] of OTHERS) if (A.el && !A.v) A.el.volume = Math.min(1, pvol(A) * VOL.all); }
+function ytVol(f, i) { const v = Math.round(clamp((VOL.win[i] == null ? 1 : VOL.win[i]) * VOL.master, 0, 1) * 100); try { f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [v] }), '*'); } catch (e) {} }
+function setAll() { if (master && ac) master.gain.setTargetAtTime(.85 * VOL.master, ac.currentTime, .05); if (voiceBus && ac) voiceBus.gain.setTargetAtTime(1.5 * VA(), ac.currentTime, .05);
+  for (const [, A] of OTHERS) if (A.el && !A.v) A.el.volume = Math.min(1, pvol(A) * VA()); for (const [f, i] of YTF) if (f.isConnected) ytVol(f, i); }
 /* ---------- camera: yours goes only to whoever asks for it; theirs opens into a tile you size yourself ---------- */
 let camStream = null, scrStream = null;
 const WATCH = new Set();
@@ -977,7 +1145,7 @@ const presenterIds = () => { const s = new Set(); for (const W of WINS) { const 
 const YTF = new Map();   // iframe -> window index
 function ytSrc(id) { return 'https://www.youtube-nocookie.com/embed/' + id + '?enablejsapi=1&playsinline=1&rel=0&modestbranding=1&origin=' + encodeURIComponent(location.origin); }
 function ytCmd(f, func, args) { try { f.contentWindow.postMessage(JSON.stringify({ event: 'command', func, args: args || [] }), '*'); } catch (e) {} }
-function ytHook(f, i) { YTF.set(f, i); f.addEventListener('load', () => { try { f.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 'w' + i }), '*'); } catch (e) {} setTimeout(() => ytSync(WINS[i], f), 700); }); }
+function ytHook(f, i) { YTF.set(f, i); f.addEventListener('load', () => { try { f.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 'w' + i }), '*'); } catch (e) {} setTimeout(() => ytSync(WINS[i], f), 700); setTimeout(() => ytVol(f, i), 1200); }); }
 const ytTime = new Map();
 addEventListener('message', e => { if (!/youtube(-nocookie)?\.com$/.test((() => { try { return new URL(e.origin).hostname; } catch (x) { return ''; } })())) return; let d; try { d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data; } catch (x) { return; }
   if (d && d.info && Number.isFinite(d.info.currentTime)) for (const [f, i] of YTF) if (f.contentWindow === e.source) ytTime.set(i, d.info.currentTime); });
@@ -1101,17 +1269,31 @@ let ORBN = 0;
 // one orb as SVG markup. mark: '+' = the logo plus (two rounded glowing bars), any other text = a one-colour Noto Emoji silhouette
 function orbSVG(stops, size, mark, o) {
   o = o || {}; const c = typeof stops === 'string' ? (SOLAR[stops] || stopsOf(stops)) : stops, id = 'ob' + (ORBN++);
+  let hs = 0; for (const ch of String(c[1]) + c[2]) hs = (hs * 31 + ch.charCodeAt(0)) >>> 0; const rr = () => ((hs = (hs * 1103515245 + 12345) >>> 0) / 4294967296);
+  // glass with depth (sheet 1) and a clear coloured rim with a bright glyph (sheet 2): no white outline
   let s = '<svg viewBox="0 0 128 128" width="' + size + '" height="' + size + '" aria-hidden="true" style="overflow:visible;display:block"><defs>' +
-    '<radialGradient id="' + id + '" cx="39%" cy="36%" r="62%"><stop offset="0" stop-color="' + c[0] + '"/><stop offset=".25" stop-color="' + c[1] + '"/><stop offset=".72" stop-color="' + c[2] + '"/><stop offset="1" stop-color="' + c[3] + '"/></radialGradient>' +
+    '<radialGradient id="' + id + '" cx="40%" cy="36%" r="66%"><stop offset="0" stop-color="' + c[0] + '"/><stop offset=".3" stop-color="' + c[1] + '"/><stop offset=".78" stop-color="' + c[2] + '"/><stop offset="1" stop-color="' + c[3] + '"/></radialGradient>' +
     '<radialGradient id="' + id + 'h"><stop offset=".55" stop-color="' + c[1] + '" stop-opacity=".55"/><stop offset="1" stop-color="' + c[1] + '" stop-opacity="0"/></radialGradient>' +
-    '<filter id="' + id + 'b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter></defs>' +
+    '<linearGradient id="' + id + 'g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>' +
+    '<linearGradient id="' + id + 'r" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset=".35" stop-color="' + c[0] + '"/><stop offset=".7" stop-color="' + c[1] + '"/><stop offset="1" stop-color="' + c[0] + '"/></linearGradient>' +
+    '<clipPath id="' + id + 'c"><circle cx="64" cy="64" r="60"/></clipPath>' +
+    '<filter id="' + id + 'b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>' +
+    '<filter id="' + id + 'f" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter></defs>' +
     '<circle cx="64" cy="64" r="' + (o.lit ? 88 : 78) + '" fill="url(#' + id + 'h)"/>' +
     (o.ring ? '<ellipse cx="64" cy="64" rx="98" ry="26" fill="none" stroke="' + c[0] + '" stroke-opacity=".85" stroke-width="7" transform="rotate(-18 64 64)"/>' : '') +
-    '<circle cx="64" cy="64" r="60" fill="url(#' + id + ')" stroke="rgba(255,255,255,.85)" stroke-width="3"/>';
+    '<circle cx="64" cy="64" r="60" fill="url(#' + id + ')"/>' +
+    '<g clip-path="url(#' + id + 'c)">' +
+      '<ellipse cx="' + (44 + rr() * 40).toFixed(1) + '" cy="' + (58 + rr() * 30).toFixed(1) + '" rx="46" ry="16" fill="' + c[0] + '" opacity=".5" filter="url(#' + id + 'f)" transform="rotate(' + (-30 + rr() * 60).toFixed(0) + ' 64 64)"/>' +
+      '<ellipse cx="64" cy="112" rx="44" ry="16" fill="' + c[0] + '" opacity=".55" filter="url(#' + id + 'f)"/>';
+  for (let k = 0; k < 6; k++) { const x = 22 + rr() * 84, y = 22 + rr() * 84, r = .8 + rr() * 1.6; s += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + r.toFixed(1) + '" fill="#fff" opacity="' + (.35 + rr() * .5).toFixed(2) + '"/>'; }
+  s += '<ellipse cx="50" cy="34" rx="30" ry="15" fill="url(#' + id + 'g)" transform="rotate(-24 50 34)"/></g>' +
+    '<circle cx="64" cy="64" r="60" fill="none" stroke="' + c[0] + '" stroke-opacity=".55" stroke-width="6" filter="url(#' + id + 'b)"/>' +
+    '<circle cx="64" cy="64" r="59.5" fill="none" stroke="url(#' + id + 'r)" stroke-width="2.6"/>';
   if (typeof mark === 'string' && mark[0] === '§') { const k = +mark[1], d = [['circle', 'cx="64" cy="64" r="31"'], ['rect', 'x="35" y="35" width="58" height="58" rx="14"'], ['ellipse', 'cx="64" cy="64" rx="40" ry="24"'], ['rect', 'x="24" y="42" width="80" height="44" rx="12"']][k] || [];
     const sh = '<' + d[0] + ' ' + d[1] + ' fill="none" stroke="#fff" stroke-width="9"/>'; s += '<g filter="url(#' + id + 'b)" opacity=".9">' + sh + '</g>' + sh; return s + '</svg>'; }
+  if (mark === '«' || mark === '»') { const p = mark === '«' ? 'M74 38 L46 64 L74 90' : 'M54 38 L82 64 L54 90', ch = '<path d="' + p + '" fill="none" stroke="#fff" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>'; s += '<g filter="url(#' + id + 'b)" opacity=".9">' + ch + '</g>' + ch; return s + '</svg>'; }
   if (mark === '+') { const bars = '<rect x="30" y="57.5" width="68" height="13" rx="6.5" fill="#fff"/><rect x="57.5" y="30" width="13" height="68" rx="6.5" fill="#fff"/>'; s += '<g filter="url(#' + id + 'b)" opacity=".9">' + bars + '</g>' + bars; }
-  else if (mark) { const t = String(mark).replace(/[<&>]/g, ''), fs = t.length > 2 ? 40 : 58, tx = '<text x="64" y="66" text-anchor="middle" dominant-baseline="central" font-family="Noto Emoji, sans-serif" font-weight="700" font-size="' + fs + '" fill="#fff"'; s += tx + ' filter="url(#' + id + 'b)" opacity=".85">' + t + '</text>' + tx + '>' + t + '</text>'; }
+  else if (mark) { const t = String(mark).replace(/[<&>]/g, ''), fs = t.length > 2 ? 40 : 58, tx = '<text x="64" y="66" text-anchor="middle" dominant-baseline="central" font-family="Noto Emoji, sans-serif" font-weight="700" font-size="' + fs + '" fill="#fff"'; s += tx + ' filter="url(#' + id + 'b)" opacity=".9">' + t + '</text>' + tx + '>' + t + '</text>'; }
   return s + '</svg>';
 }
 // a button that is just an orb
@@ -1121,7 +1303,7 @@ function orbBtn(stops, size, mark, label, f) {
 }
 /* ---------- menu sounds, made in code (no files): tick, pop, open, back, whoosh ---------- */
 function sfx(kind) {
-  if (!ac || VOL.orb === 0) return; const t = ac.currentTime, g = ac.createGain(), o = ac.createOscillator(), v = .12 * Math.max(.25, VOL.orb);
+  if (!ac || VOL.ui === 0) return; const t = ac.currentTime, g = ac.createGain(), o = ac.createOscillator(), v = .12 * VOL.ui;
   g.connect(master); o.connect(g);
   const env = (a, d, peak) => { g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak * v, t + a); g.gain.exponentialRampToValueAtTime(.0001, t + a + d); };
   if (kind === 'tick') { o.type = 'triangle'; o.frequency.setValueAtTime(1320, t); o.frequency.exponentialRampToValueAtTime(880, t + .05); env(.003, .07, .55); o.start(t); o.stop(t + .1); }
@@ -1138,38 +1320,98 @@ function sfx(kind) {
 let myCol = '#4f8cff'; try { const c = localStorage.getItem('onaroom.col'); if (/^#[0-9a-f]{6}$/i.test(c || '')) myCol = c; } catch (e) {}
 const hueOf = hex => { const h = {}; new THREE.Color(hex).getHSL(h); return h.h; };
 const colFromHue = h => '#' + new THREE.Color().setHSL(((h % 1) + 1) % 1, .78, .58).getHexString();
+/* ---------- the landing: your 24 orbs float together in open space between two words.
+   Touch them and they spread into a helix, each to its nearest place; front ones bold, back ones shy.
+   Tap one, it comes forward; type your name; enter and you float in. ---------- */
 const LAND = { R: 150, marks: new Map(), t: 0 };
+const L3 = { r: null, sc: null, cam: null, O: [], state: 'bundle', sel: -1, mode: 'enter', rot: 0, hover: -1, px: -9, py: -9, idle: 0, w: 0, h: 0, S: 1, cx: 0, cy: 0, hid: false, let: 0 };
+const L3VS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }';
+{ const i = ORBS.findIndex(o => o.c === String(myCol).toLowerCase()); if (i < 0) myCol = ORBS[0].c; }
+function landGL() {
+  if (L3.r) return true;
+  try { const c = document.createElement('canvas'); c.id = 'lgl'; $('intro').prepend(c);
+    L3.r = new THREE.WebGLRenderer({ canvas: c, alpha: true, antialias: false }); L3.r.setPixelRatio(.35); L3.lowres = 1;   // starts low-res and pixelated, sharpens once settled L3.r.setClearColor(0x000000, 0);
+    L3.sc = new THREE.Scene(); L3.cam = new THREE.OrthographicCamera(0, 1, 1, 0, -10, 10); const geo = new THREE.PlaneGeometry(1, 1), rnd = (s => () => (s = (s * 16807) % 2147483647) / 2147483647)(7);
+    L3.O = ORBS.map((o, i) => { const m = new THREE.Mesh(geo, new THREE.ShaderMaterial({ uniforms: orbUniforms(o.c, .34), vertexShader: L3VS, fragmentShader: ORB_FS, transparent: true, depthWrite: false, depthTest: false })); L3.sc.add(m);
+      // a loose bundle: points in a squashed ball, each with its own drift
+      const th = rnd() * TAU, ph = Math.acos(2 * rnd() - 1), rr = .35 + .65 * Math.cbrt(rnd());
+      return { o, m, home: new V3(Math.sin(ph) * Math.cos(th) * rr, Math.cos(ph) * rr * .62, Math.sin(ph) * Math.sin(th) * rr), p: new V3(), v: new V3(), tgt: new V3(), slot: -1, ph: rnd() * TAU, sp: .6 + rnd() * .8, sc: 1, z: 0, sx: 0, sy: 0, size: 0 }; });
+    L3.O.forEach(q => q.p.copy(q.home)); return true;
+  } catch (e) { L3.r = null; return false; }
+}
+// the helix: 24 places winding back along z, 8 to a turn. Each orb takes its nearest free place
+function helixSlots() { const S = []; for (let i = 0; i < 24; i++) { const th = i * TAU / 8 + Math.PI / 2; S.push(new V3(Math.cos(th) * .95, (i / 23 - .5) * 1.25, Math.sin(th))); } return S; }
+function spread() {
+  if (L3.state !== 'bundle') return; L3.state = 'pick'; sfx('whoosh'); const i = ORBS.findIndex(o => o.c === String(myCol).toLowerCase()); choose(i < 0 ? 0 : i, true);
+}
+function choose(i, quiet) {
+  if (L3.state === 'bundle') { L3.state = 'pick'; } if (i === L3.sel) return; L3.sel = i; myCol = L3.O[i].o.c; try { localStorage.setItem('onaroom.col', myCol); } catch (x) {}
+  setColor(me, myCol); if (!quiet) sfx('pop'); $('intro').classList.add('named'); const g = $('lgo'); if (g) g.innerHTML = orbSVG(myCol, 56, '+'); landArrows();
+}
+function landStep(d) { if (L3.sel < 0) return; choose((L3.sel + d + 24) % 24); }
+function landArrows() { const i = L3.sel < 0 ? 0 : L3.sel; $('lprev').innerHTML = orbSVG(ORBS[(i + 23) % 24].c, 54, '«'); $('lnext').innerHTML = orbSVG(ORBS[(i + 1) % 24].c, 54, '»'); }
+function landText() { const t = $('ltop'); t.textContent = $('name').value || ''; t.style.color = TC; }
+function textColour() { let c = TC; while (c === TC) c = TCOLS[Math.floor(Math.random() * TCOLS.length)]; TC = c; try { localStorage.setItem('onaroom.tc', TC); } catch (x) {} landText(); sfx('tick'); }
+function unchoose() {}
+function landGo() {   // name entered: float in, or (making a room) set the room up first
+  if (L3.sel < 0) return; const n = clean($('name').value, 18); try { localStorage.setItem('blue42.together.name', n); } catch (x) {}
+  if (L3.mode === 'create') { hostOpts(true); return; } begin();
+}
+function landMode(m) { L3.mode = m; $('lt1').classList.toggle('dim', m === 'create'); $('lt2').classList.toggle('dim', m === 'enter' && L3.picked); L3.picked = 1; sfx('tick'); spread(); }
 function landBuild() {
-  const box = $('land'), R = LAND.R = Math.min(170, Math.floor(Math.min(innerWidth, innerHeight * .62) * .42));
-  box.style.setProperty('--R', R + 'px');
-  $('lorb').innerHTML = orbSVG(myCol, Math.round(R * 1.05), '+', { lit: 1 });
-  landKnob(); setColor(me, myCol);
+  const box = $('land'); LAND.R = Math.min(170, Math.floor(Math.min(innerWidth * .78, innerHeight * .62) * .42)); box.style.setProperty('--R', LAND.R + 'px');
+  $('lt1').textContent = CODE === 'lobby' ? 'enter lobby' : 'enter room';
+  if (!landGL()) return; const w = innerWidth, h = innerHeight; L3.r.setSize(w, h); L3.cam.right = w; L3.cam.top = h; L3.cam.updateProjectionMatrix();
+  L3.w = w; L3.h = h; L3.cx = w / 2; L3.cy = h * .5; L3.S = Math.min(w * .42, h * .3); setColor(me, myCol);
 }
-function landKnob() { const a = hueOf(myCol) * TAU - Math.PI / 2, R = LAND.R * .93, k = $('lknob'); k.style.transform = 'translate(' + (Math.cos(a) * R).toFixed(1) + 'px,' + (Math.sin(a) * R).toFixed(1) + 'px)'; k.style.background = myCol; }
-function pickHue(e) {
-  const r = $('hue').getBoundingClientRect(), x = e.clientX - (r.left + r.width / 2), y = e.clientY - (r.top + r.height / 2);
-  if (Math.hypot(x, y) < LAND.R * .62) return false;
-  let h = (Math.atan2(y, x) + Math.PI / 2) / TAU; h = ((h % 1) + 1) % 1; const c = colFromHue(h);
-  if (c !== myCol) { const step = Math.round(h * 36) !== Math.round(hueOf(myCol) * 36); myCol = c; if (step) sfx('tick'); try { localStorage.setItem('onaroom.col', myCol); } catch (x) {} $('lorb').innerHTML = orbSVG(myCol, Math.round(LAND.R * 1.05), '+', { lit: 1 }); landKnob(); setColor(me, myCol); const g = $('go').querySelector('.ob'); if (g) g.innerHTML = orbSVG(myCol, 64, '+'); }
-  return true;
+// what sits where on screen, front to back
+function landHit(x, y) { let best = -1, bz = -9; L3.O.forEach((q, i) => { if (Math.hypot(x - q.sx, y - q.sy) < q.size * .36 && q.z > bz) { bz = q.z; best = i; } }); return best; }
+function landLetGo() { L3.let = 1; }
+function landHideSel() { L3.hid = true; }
+$('intro').addEventListener('pointerdown', e => {
+  if (started || e.target.closest('input,button,#host,#arch,#lt1,#lt2')) return; const i = landHit(e.clientX, e.clientY);
+  if (L3.state === 'bundle') { spread(); return; }   // the first touch opens them up
+  if (i >= 0) choose(i);
+});
+addEventListener('pointermove', e => { if (started) return; L3.px = e.clientX; L3.py = e.clientY; L3.idle = 0; });
+addEventListener('wheel', () => { if (!started && L3.state === 'bundle') spread(); }, { passive: true });
+addEventListener('keydown', e => { if (started || $('intro').hidden) return; if (document.activeElement === $('name')) { if (e.key === 'Enter') { e.preventDefault(); landGo(); } return; }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); if (L3.state === 'bundle') spread(); else landStep(e.key === 'ArrowRight' ? 1 : -1); } });
+function landMarks() {}
+function landFrame(dt) {
+  if (!L3.r || $('intro').hidden) return; const t = time, w = L3.w, h = L3.h, S = L3.S;
+  L3.idle += dt; L3.rot += dt * (L3.state === 'bundle' ? .18 : .11);
+  L3.Rx = Math.min(w * .43, 400); L3.Ry = clamp(h * .11, 56, 140); L3.cy = lerp(L3.cy, h * (L3.state === 'bundle' ? .5 : .4), 1 - Math.exp(-dt * 4));
+  L3.Sy = L3.Sx = S;
+  let hov = -1; if (L3.px > 0) hov = landHit(L3.px, L3.py); if (hov !== L3.hover) { L3.hover = hov; if (hov >= 0) sfx('tick'); }
+  if (L3.state === 'bundle' && hov >= 0 && L3.idle < .1) { L3.hoverT = (L3.hoverT || 0) + dt; if (L3.hoverT > .45) spread(); }
+  const cr = Math.cos(L3.rot), sr = Math.sin(L3.rot);
+  L3.O.forEach((q, i) => {
+    let tx, ty, tz;
+    if (L3.state === 'bundle') { const H = q.home; tx = H.x * cr + H.z * sr; tz = -H.x * sr + H.z * cr; ty = H.y + Math.sin(t * q.sp + q.ph) * .05; }
+    else if (i === L3.sel) { tx = 0; ty = Math.sin(t * 1.3) * .015; tz = 1.3; }
+    else { const j = (i - L3.sel - 1 + 24) % 24, a = L3.rot + (j + .5) * TAU / 23; tz = Math.sin(a) * .9; const kz = 1 - tz * .28;   // the other 23 loop around you
+      tx = Math.cos(a) * L3.Rx / S * kz; ty = -Math.sin(a) * L3.Ry / S * kz + Math.sin(t * q.sp + q.ph) * .02; }
+    // a gentle pull toward the pointer while bundled, so they feel alive
+    if (false) { const dx = (L3.px - L3.cx) / S - tx, dy = -(L3.py - L3.cy) / S - ty, d = Math.hypot(dx, dy); if (d < .9) { tx += dx * .08 * (1 - d / .9); ty += dy * .08 * (1 - d / .9); } }
+    q.v.x += ((tx - q.p.x) * 38 - q.v.x * 9) * dt; q.v.y += ((ty - q.p.y) * 38 - q.v.y * 9) * dt; q.v.z += ((tz - q.p.z) * 38 - q.v.z * 9) * dt;
+    q.p.addScaledVector(q.v, dt);
+    const z = q.p.z, k = 1 / (1 - z * .28), ring = L3.state === 'pick' && i !== L3.sel, size = S * .44 * k * (ring ? .55 : 1) * (i === hov ? 1.12 : 1) * (i === L3.sel && L3.let ? 1 + Math.min(.15, L3.let * .2) : 1);
+    q.z = z; q.sx = L3.cx + q.p.x * L3.Sx * k; q.sy = L3.cy - q.p.y * L3.Sy * k; q.size = size;
+    q.m.position.set(q.sx, h - q.sy, 0); q.m.scale.set(size, size, 1); q.m.renderOrder = Math.round(z * 100);
+    const u = q.m.material.uniforms, shy = clamp((z + 1) / 2, 0, 1); u.opacity.value = (i === L3.sel && L3.hid) ? 0 : (L3.let && i !== L3.sel ? Math.max(0, .55 - L3.let) : .55 + .45 * shy); u.uTint.value.setScalar(.72 + .28 * shy);
+    if (L3.px > 0) u.uLook.value.set(clamp((L3.px - q.sx) / size, -1, 1), clamp(-(L3.py - q.sy) / size, -1, 1));
+  });
+  if (L3.let) L3.let += dt;
+  // the float-in starts from the chosen orb: keep the burst's source where it is on screen
+  const q = L3.O[L3.sel], lo = $('lorb');
+  if (q && L3.state === 'pick') { const cs = S * .44 / (1 - 1.3 * .28), ax = Math.round(Math.min(cs * .78 + 34, w * .5 - 34)), cy = Math.round(L3.cy); const ay = Math.round(cy + L3.Ry + S * .2 + 30); $('lprev').style.left = (L3.cx - 44) + 'px'; $('lnext').style.left = (L3.cx + 44) + 'px'; $('lprev').style.top = $('lnext').style.top = ay + 'px';   // beneath the orbs, steady so they're easy to hit
+    $('ltop').style.left = L3.cx + 'px'; $('ltop').style.top = Math.round(cy - cs * .42) + 'px'; $('land').style.top = Math.round(L3.cy + L3.Ry + S * .2 + 72) + 'px'; }
+  if (q) { lo.style.left = q.sx + 'px'; lo.style.top = q.sy + 'px'; lo.style.width = lo.style.height = (q.size * .68) + 'px'; }
+  L3.r.render(L3.sc, L3.cam);
+  L3.frames = (L3.frames || 0) + 1;
+  if (L3.lowres && L3.frames > 40 && dt < .05) { L3.lowres = 0; L3.r.setPixelRatio(Math.min(2, devicePixelRatio || 1)); L3.r.setSize(L3.w, L3.h); L3.r.domElement.classList.add('sharp'); }
 }
-{ let drag = false; const ring = $('hue');
-  ring.addEventListener('pointerdown', e => { startAudio(); if (pickHue(e)) { drag = true; ring.setPointerCapture(e.pointerId); } });
-  ring.addEventListener('pointermove', e => { if (drag) pickHue(e); });
-  ring.addEventListener('pointerup', () => { drag = false; }); ring.addEventListener('pointercancel', () => { drag = false; }); }
-// the orbs already in the room: little orbs on the ring at their colour, their name under them
-function landMarks() {
-  const box = $('lmarks'), seen = new Set();
-  for (const [id, A] of OTHERS) {
-    if (!A.have || !A.col) continue; seen.add(id); let m = LAND.marks.get(id);
-    if (!m) { m = document.createElement('div'); m.className = 'lmark'; box.appendChild(m); LAND.marks.set(id, m); m.dataset.c = ''; }
-    if (m.dataset.c !== A.col + nameOf(A)) { m.dataset.c = A.col + nameOf(A); m.innerHTML = orbSVG(A.col, 30, null) + '<b>' + nameOf(A).replace(/[<&>]/g, '') + '</b>'; }
-    const a = hueOf(A.col) * TAU - Math.PI / 2, R = LAND.R * 1.16; m.style.transform = 'translate(' + (Math.cos(a) * R).toFixed(1) + 'px,' + (Math.sin(a) * R).toFixed(1) + 'px)';
-  }
-  for (const [id, m] of LAND.marks) if (!seen.has(id)) { m.remove(); LAND.marks.delete(id); }
-  const n = seen.size; $('lroom').textContent = (CODE === 'lobby' ? 'lobby' : CODE) + (n ? ' · ' + n + ' here' : '');
-}
-function landFrame(dt) { if (started) return; LAND.t += dt; if (LAND.t > .5) { LAND.t = 0; landMarks(); } }
 // float in: the landing orb breathes in, comes apart into its own dots, the dots hang while your place is found,
 // then spiral into the exact spot where your orb is in the world and fill it up. The dots ARE you, becoming the orb.
 const _fp = new V3();
@@ -1179,7 +1421,7 @@ function orbOnScreen() { // where your 3D orb sits on screen right now, and how 
   return { x: (_fp.x * .5 + .5) * innerWidth, y: (-_fp.y * .5 + .5) * innerHeight, r: Math.max(6, r), ok: _fp.z < 1 };
 }
 function burst(done) {
-  const L = $('lorb'), r = L.getBoundingClientRect();
+  const L = $('lorb'), r = L.getBoundingClientRect(); landLetGo();   // the chosen orb swells as it lets go
   if (!MOT) { FORM.k = 1; done(); return; }
   FORM.on = true; FORM.k = 0;
   const c = $('burst'), x = c.getContext('2d'), W = c.width = innerWidth, H = c.height = innerHeight;
@@ -1189,7 +1431,7 @@ function burst(done) {
   sfx('whoosh');
   setTimeout(() => {
     // 2 · come apart: every dot is a piece of your orb, white near the middle like the orb's light
-    L.style.visibility = 'hidden'; done();
+    L.style.visibility = 'hidden'; landHideSel(); done();
     const dots = [];
     for (let i = 0; i < 560; i++) { const rr = Math.sqrt(Math.random()) * R * 1.14, a = Math.random() * TAU, sp = 120 + Math.random() * 380;
       dots.push({ x: cx + Math.cos(a) * rr, y: cy + Math.sin(a) * rr, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, c: rr < R * .25 || Math.random() < .1 ? '#ffffff' : cols[i % 3], s: 1.5 + Math.random() * 2.3, ph: Math.random() * TAU, home: false, delay: Math.random() * .35 }); }
@@ -1198,10 +1440,10 @@ function burst(done) {
     const hx = (c, a) => c + Math.round(clamp(a, 0, 1) * 255).toString(16).padStart(2, '0');
     const bloom = (X, Y, R, a) => { if (a <= .01) return; const r = x.createRadialGradient(X, Y, 0, X, Y, R); r.addColorStop(0, hx('#ffffff', a)); r.addColorStop(.22, hx(P.g[0], a * .7)); r.addColorStop(.55, hx(P.g[1], a * .18)); r.addColorStop(1, hx(P.g[1], 0)); x.fillStyle = r; x.beginPath(); x.arc(X, Y, R, 0, TAU); x.fill(); };
     (function step(now) {
-      const dt = Math.min(.04, (now - last) / 1000); last = now; t += dt; x.clearRect(0, 0, W, H);
-      const O = orbOnScreen();
+      const dt = Math.min(.1, (now - last) / 1000); last = now; t += dt; if (t > 9 && !popped) gt = Math.max(gt, 3);   // slow devices still finish x.clearRect(0, 0, W, H);
+      const O = FORM.O || orbOnScreen();
       // 3 · hang as a slow cloud until you have a place (or 2.4s pass), then gather
-      if (gt < 0 && t > .55 && (mySeat >= 0 || t > 2.4)) { gt = 0; sfx('gather'); } if (gt >= 0) gt += dt;
+      if (gt < 0 && t > .55 && (mySeat >= 0 || t > 2.4)) { if (!FORM.pin) { AP = null; FORM.pin = pos.clone(); FORM.snap = true; } else if (!FORM.snap) { FORM.O = orbOnScreen(); gt = 0; sfx('gather'); } } if (gt >= 0) gt += dt;   // pin the orb and the camera first, then gather to that exact spot
       x.globalCompositeOperation = 'lighter';
       let home = 0;
       for (const d of dots) {
@@ -1224,11 +1466,14 @@ function burst(done) {
       gl = lerp(gl, f, 1 - Math.exp(-dt * 10)); x.globalAlpha = 1;
       const vr = O.r * .45;   // the orb's visible body
       if (!popped) bloom(O.x, O.y, vr * (1.3 + gl * 1.1), gl * .85);   // a light gathers where you will be, the orb grows inside it
-      if (!popped && (f > .96 || gt > 2.2)) { popped = true; sfx('form'); ripple(pos.x, pos.z); FORM.t = 0; }
+      if (!popped && (f > .96 || gt > 2.2)) { popped = true; sfx('form'); ripple(pos.x, pos.z); FORM.t = 0; warpStart(O.x, O.y); }
       if (popped) { FORM.t += dt; const u = Math.min(1, FORM.t / .45), w = Math.min(1, FORM.t / .7); FORM.k = 1 + Math.sin(u * Math.PI) * .22 * (1 - u);
-        bloom(O.x, O.y, vr * (1.6 + w * 2.6), .9 * (1 - w) * (1 - w)); }   // one soft flash that dissolves outward
+        if (FORM.t > .6 && FORM.on) { FORM.on = false; FORM.pin = null; FORM.O = O; }   // formed: you're free to move while the flash and name finish
+        const w2 = Math.min(1, FORM.t / .95); bloom(O.x, O.y, vr * (1.5 + w2 * 3), 1 * (1 - w2) * (1 - w2));   // one soft, bright flash that dissolves outward as the orb fades in
+        const na = sm(0, .35, FORM.t) * (1 - sm(1.2, 1.7, FORM.t)); if (na > .01 && myName) { x.globalCompositeOperation = 'source-over'; x.globalAlpha = na; x.font = '700 ' + Math.round(Math.max(20, vr * .55)) + 'px "Pixelify Sans", sans-serif'; x.textAlign = 'center'; x.textBaseline = 'bottom';
+          x.fillStyle = '#000'; x.fillText(myName, O.x + 2, O.y - vr * 1.25 + 2 - (1 - na) * 8); x.fillStyle = TC; x.fillText(myName, O.x, O.y - vr * 1.25 - (1 - na) * 8); x.globalAlpha = 1; } }   // your name fades in above you during the crossover
       x.globalCompositeOperation = 'source-over';
-      if (!popped || FORM.t < .7) requestAnimationFrame(step); else { FORM.k = 1; FORM.on = false; x.clearRect(0, 0, W, H); c.hidden = true; L.style.cssText = ''; L.style.visibility = ''; }
+      if (!popped || FORM.t < 1.7) requestAnimationFrame(step); else { FORM.k = 1; FORM.on = false; FORM.pin = null; FORM.O = null; x.clearRect(0, 0, W, H); c.hidden = true; L.style.cssText = ''; L.style.visibility = ''; }
     })(last);
   }, 240);
 }
@@ -1252,9 +1497,7 @@ function solNodes(id) {
     return { center: ['earth', '👥', 'back'], items: it }; }
   if (id === 'windows') return { center: ['mars', '🪟', 'back'], items: WINS.map(W => { const S = W.st, k = kindName(W), p = presOf(W);
     return { p: S.type === 'scr' ? 'sun' : S.type === 'yt' ? 'mars' : S.type === 'img' ? 'venus' : (S.strokes.size || S.text) ? 'moon' : 'dark', m: k || String(W.i + 1), w: 'window ' + (W.i + 1) + (p ? ' · 🎤 ' + nameOf(whoIs(p) || me) : ''), act: () => { closeSolar(); openCard(W.i); } }; }) };
-  if (id === 'vol') { const it = [{ p: myCol, m: '+', w: 'your orb\'s hum', get: () => VOL.orb, set: v => { VOL.orb = v; }, max: 1 }, { p: 'jupiter', m: '🗣', w: 'all voices', get: () => VOL.all, set: v => { VOL.all = v; setAll(); }, max: 2 }];
-    for (const [, A] of OTHERS) if (A.have) it.push({ p: colOf(A), m: null, w: nameOf(A), get: () => A.mute ? 0 : (A.vol == null ? 1 : A.vol), set: v => { A.mute = v === 0; A.vol = v; setAll(); }, max: 2 });
-    return { center: ['jupiter', '🔊', 'back'], items: it, vol: 1 }; }
+  if (id === 'vol') return { center: ['jupiter', '🔊', 'back'], items: [], panel: 'vol' };
   if (id === 'look') return { center: ['uranus', '⚙', 'back'], items: [
     { p: 'moon', m: '🔤', w: PIX ? 'pixel letters' : 'clean letters', act: () => setFont(!PIX), live: () => PIX },
     { p: 'moon', m: '🔭', w: 'view from above', act: () => toggleView(), live: () => view === 'above' },
@@ -1263,6 +1506,37 @@ function solNodes(id) {
     { p: 'moon', m: '✨', w: 'make a new room', act: () => freshRoom() }] };
   if (id === 'keys') return { center: ['neptune', '🕹', 'back'], items: [['🕹', 'forward · W ↑'], ['↔', 'turn · A D'], ['⏫', 'up · Space'], ['⏬', 'down · Shift'], ['⚡', 'boost · Q'], ['🎙', 'mic · M'], ['📢', 'hold to talk · T'], ['💬', 'words overhead · Enter'], ['🪐', 'this menu · I'], ['👆', 'double-tap a window or orb']].map(([m, w]) => ({ p: 'neptune', m, w, act: () => {} })) };
   return solNodes('root');
+}
+/* ---------- the volume page: one slider per sound. Tap a sound's orb to mute it; drag along its line to set it ---------- */
+function volRows() {
+  const R = [
+    { k: 'master', p: 'sun', m: '🔊', w: 'everything', max: 1 },
+    { k: 'voices', p: 'jupiter', m: '🗣', w: 'voices', max: 2 },
+    { k: 'prox', p: 'neptune', m: '📡', w: 'closer is louder', tog: 1 },
+    { k: 'orb', p: myCol, m: '+', w: 'my orb', max: 1 },
+    { k: 'others', p: 'saturn', m: '🫧', w: "others' orbs", max: 1 },
+    { k: 'ui', p: 'venus', m: '🔔', w: 'menu sounds', max: 1 },
+    { k: 'world', p: 'earth', m: '🌊', w: 'waterfall and wind', max: 1 }];
+  R.forEach(r => { r.get = () => VOL[r.k]; r.set = v => { VOL[r.k] = v; }; });
+  for (const [, A] of OTHERS) if (A.have) R.push({ p: colOf(A), m: null, w: nameOf(A), max: 2, get: () => pvol(A), set: v => { A.mute = v === 0; A.vol = v; } });
+  const seen = new Set(); for (const [f, i] of YTF) if (f.isConnected && !seen.has(i)) { seen.add(i); R.push({ p: 'mars', m: '📺', w: 'window ' + (i + 1) + ' video', max: 1, get: () => VOL.win[i] == null ? 1 : VOL.win[i], set: v => { VOL.win[i] = v; } }); }
+  return R;
+}
+function volPanel() {
+  const P = document.createElement('div'); P.id = 'volp'; $('solar').appendChild(P);
+  for (const r of volRows()) {
+    const row = document.createElement('div'); row.className = 'vrow'; const ic = orbBtn(r.p, 46, r.m, r.w, () => {}), cs = typeof r.p === 'string' && !SOLAR[r.p] ? r.p : (SOLAR[r.p] || ['#fff', '#fff'])[1];
+    const t = document.createElement('div'); t.className = 'vt' + (r.tog ? ' tog' : ''); t.style.setProperty('--c', cs); t.innerHTML = '<i class="vf"></i><b class="vk">' + orbSVG(r.p, 26, null) + '</b>';
+    const w = document.createElement('span'); w.className = 'vw'; row.append(ic, t, w); P.appendChild(row);
+    const show = () => { const v = r.get(), f = r.tog ? (v ? 1 : 0) : v / r.max; t.querySelector('.vf').style.width = (f * 100) + '%'; t.querySelector('.vk').style.left = (f * 100) + '%'; row.classList.toggle('off', !v); w.textContent = r.w + ' · ' + (r.tog ? (v ? 'on' : 'off') : Math.round(v * 100) + '%'); };
+    const apply = v => { r.set(v); setAll(); saveVol(); show(); };
+    ic.addEventListener('click', () => { const v = r.get(); if (r.tog) { apply(v ? 0 : 1); return; } if (v) { r.was = v; apply(0); } else apply(r.was || 1); });
+    t.addEventListener('pointerdown', e => { e.stopPropagation(); if (r.tog) { apply(r.get() ? 0 : 1); sfx('tick'); return; } t.setPointerCapture(e.pointerId); let last = -1;
+      const at = ev => { const b = t.getBoundingClientRect(), f = clamp((ev.clientX - b.left) / b.width, 0, 1), v = Math.round(f * r.max * 20) / 20; if (v !== last) { if (last >= 0 && Math.round(v * 10) !== Math.round(last * 10)) sfx('tick'); last = v; apply(v); } };
+      at(e); const mvf = ev => at(ev), up = () => { t.removeEventListener('pointermove', mvf); t.removeEventListener('pointerup', up); t.removeEventListener('pointercancel', up); };
+      t.addEventListener('pointermove', mvf); t.addEventListener('pointerup', up); t.addEventListener('pointercancel', up); });
+    show();
+  }
 }
 function openSolar(at, space) {
   if (!started) return; SOL.space = !!space; $('solar').classList.toggle('space', SOL.space); closeCard(); skyFan(false); if (SPEC.on) specOff();
@@ -1282,13 +1556,14 @@ function solBuild(keep) {
     if (it.live && it.live()) b.classList.add('live');
     b.addEventListener('pointerdown', e => solDown(e, i)); box.appendChild(b); return b; });
   const c = N.center; $('solc').innerHTML = orbSVG(c[0], 104, c[1], { lit: 1 }); $('solc').setAttribute('aria-label', c[2]);
+  const old = $('volp'); if (old) old.remove(); if (N.panel === 'vol') volPanel();
   if (!keep) solAim(SOL.lit, true); else if (SOL.lit >= N.items.length) solAim(N.items.length - 1, true);
   solWord();
 }
 const SN = () => SOL.items.length || 1;
 function solAim(i, snap) { SOL.lit = ((i % SN()) + SN()) % SN(); let t = -SOL.lit / SN() * TAU, d = t - SOL.th; d = Math.atan2(Math.sin(d), Math.cos(d)); SOL.thT = SOL.th + d; if (snap) { SOL.th = SOL.thT; SOL.thV = 0; } solWord(); }
 function solStep(d) { if (SOL.node && SOL.node.vol) { SOL.lit = ((SOL.lit + d) % SN() + SN()) % SN(); solWord(); sfx('tick'); return; } solAim(SOL.lit + d); sfx('tick'); }
-function solWord() { const it = SOL.items[SOL.lit], w = $('solw'); if (!it) { w.textContent = ''; return; } w.textContent = it.get ? it.w + ' · ' + Math.round(it.get() * 100) + '%' : it.w; }
+function solWord() { const it = SOL.items[SOL.lit], w = $('solw'); if (!it || SOL.node.panel) { w.textContent = ''; return; } w.textContent = it.get ? it.w + ' · ' + Math.round(it.get() * 100) + '%' : it.w; }
 function solActivate(i) {
   const it = SOL.items[i]; if (!it) return;
   if (it.sub) { solPush(it.sub); return; }
@@ -1313,7 +1588,7 @@ function solFrame(dt) {
   if (!SOL.open) return; SOL.grow = Math.min(1, SOL.grow + dt * 2.6); const g = MOT ? 1 - Math.pow(1 - SOL.grow, 3) : 1;
   const growRate = SOL.space && SOL.stack.length === 1 ? 1.1 : 2.6; SOL.grow = Math.min(1, SOL.grow + dt * (growRate - 2.6));
   if (!SOL.drag) { const k = 170, c = 2 * Math.sqrt(k) * .8; for (let s = 0; s < 3; s++) { const h = dt / 3; SOL.thV += (-k * (SOL.th - SOL.thT) - c * SOL.thV) * h; SOL.th += SOL.thV * h; } if (!MOT) SOL.th = SOL.thT; }
-  const C = solCenter(), G = solGeo(), n = SN(); $('solc').style.transform = 'translate(' + C.x + 'px,' + C.y + 'px) translate(-50%,-50%)';
+  const C = SOL.node.panel ? { x: innerWidth / 2, y: Math.max(64, innerHeight * .11) } : solCenter(), G = solGeo(), n = SN(); $('solc').style.transform = 'translate(' + C.x + 'px,' + C.y + 'px) translate(-50%,-50%)';
   let wx = C.x, wy = C.y + G.ry + 60;
   SOL.els.forEach((el, i) => {
     let x, y, s, op, z;
@@ -1327,7 +1602,7 @@ function solFrame(dt) {
 $('solc').addEventListener('click', e => { e.stopPropagation(); solBack(); });
 $('solar').addEventListener('pointerdown', e => { if (e.target === $('solar')) { SOL.drag = null; const x0 = e.clientX, th0 = SOL.th; const mv = ev => { if (SOL.node.vol) return; SOL.th = th0 + (ev.clientX - x0) / solGeo().rx * 1.4; SOL.thT = SOL.th; const k = ((Math.round(-SOL.th / TAU * SN()) % SN()) + SN()) % SN(); if (k !== SOL.lit) { SOL.lit = k; solWord(); sfx('tick'); } };
   const up = ev => { removeEventListener('pointermove', mv); removeEventListener('pointerup', up); if (Math.abs(ev.clientX - x0) < 6) closeSolar(); else solAim(SOL.lit); }; addEventListener('pointermove', mv); addEventListener('pointerup', up); } });
-$('solar').addEventListener('wheel', e => { e.preventDefault(); if (Math.abs(e.deltaY) + Math.abs(e.deltaX) < 4) return; const now = performance.now(); if (now - (SOL.wt || 0) < 110) return; SOL.wt = now; solStep((e.deltaY || e.deltaX) > 0 ? 1 : -1); }, { passive: false });
+$('solar').addEventListener('wheel', e => { if (e.target.closest && e.target.closest('#volp')) return; e.preventDefault(); if (Math.abs(e.deltaY) + Math.abs(e.deltaX) < 4) return; const now = performance.now(); if (now - (SOL.wt || 0) < 110) return; SOL.wt = now; solStep((e.deltaY || e.deltaX) > 0 ? 1 : -1); }, { passive: false });
 
 /* ---------- the sky orb: the colour of the sky right now. Tap it: 9 skies fan out. Under it: who added which colour ---------- */
 let myS = null; try { const s = JSON.parse(localStorage.getItem('onaroom.sky2') || 'null'); if (Array.isArray(s) && s.length === 4 && s.every(c => /^#[0-9a-f]{6}$/i.test(c))) myS = s; } catch (e) {}
@@ -1405,12 +1680,17 @@ function begin() {
   setTimeout(() => { if (mySeat < 0) takeSeat(pickSeat(), true); else if (A_hi) A_hi.send(hiMsg()).catch(() => {}); }, Math.max(150, 1600 - (performance.now() - connectedAt)));
   tip((CODE === 'lobby' ? 'the lobby' : 'room ' + CODE) + ' · I or ✚ for the menu', 5000);
 }
+$('lt1').addEventListener('click', () => landMode('enter')); $('lt2').addEventListener('click', () => landMode('create'));
+{ const g = orbBtn(myCol, 56, '+', 'Float in', landGo); g.id = 'lgo'; $('lgob').appendChild(g);
+  const tb = orbBtn('moon', 46, 'Aa', 'Name colour', textColour); tb.id = 'laa'; $('land').insertBefore(tb, $('name'));
+  for (const [id, d] of [['lprev', -1], ['lnext', 1]]) { const b = document.createElement('button'); b.type = 'button'; b.className = 'ob larrow'; b.id = id; b.setAttribute('aria-label', d < 0 ? 'previous orb' : 'next orb'); b.addEventListener('click', () => { sfx('pop'); landStep(d); }); $('intro').appendChild(b); }
+  const lt = document.createElement('div'); lt.id = 'ltop'; $('intro').appendChild(lt); $('name').addEventListener('input', landText); landArrows(); landText(); }
 $('go').appendChild(orbBtn(myCol, 64, '+', 'Float in', begin)); $('go').insertAdjacentHTML('beforeend', '<b>float in</b>');
 $('fresh').appendChild(orbBtn('moon', 52, '✨', 'Make a new room', () => hostOpts(true))); $('fresh').insertAdjacentHTML('beforeend', '<b>make a new room</b>');
 /* ---------- host: a new room starts as it is, random, or architected ---------- */
 const randCfg = () => ({ n: 3 + Math.floor(Math.random() * 10), t: Math.floor(Math.random() * THEMES.length), s: Math.floor(Math.random() * SHAPES.length) });
 function hostOpts(on) {
-  const h = $('host'); h.hidden = !on; document.querySelector('.lacts').hidden = on; $('name').hidden = on; if (!on) return; if (h.childElementCount) return;
+  const h = $('host'); h.hidden = !on; document.querySelector('.lacts').hidden = on; $('name').hidden = on; $('lgob').hidden = on; if (!on) return; if (h.childElementCount) return;
   const add = (b, w) => { const d = document.createElement('div'); d.className = 'lact'; d.appendChild(b); d.insertAdjacentHTML('beforeend', '<b>' + w + '</b>'); h.appendChild(d); };
   add(orbBtn(myCol, 56, '+', 'A new room as it is', () => goRoom(DEFCFG)), 'default');
   add(orbBtn('saturn', 56, '🎲', 'A new room, randomized', () => goRoom(randCfg())), 'random');
@@ -1437,7 +1717,7 @@ function archBuild() {
   const r4 = row(); r4.appendChild(orbBtn('dark', 36, '✕', 'Back', archClose)); r4.appendChild(orbBtn('saturn', 44, '🎲', 'Randomize', () => archSet(randCfg())));
   const go = orbBtn(myCol, 64, '+', 'Make this room', () => goRoom(ARCH.cfg)); go.classList.add('go'); r4.appendChild(go);
 }
-$('name').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); begin(); } e.stopPropagation(); });
+$('name').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); landGo(); } e.stopPropagation(); });
 // the HUD: your orb (the menu), the mic, words overhead. Everything else lives in the menu.
 function hudBuild() {
   const h = $('hud'); h.textContent = '';
@@ -1543,6 +1823,23 @@ let last = performance.now();
 function resize() { const w = stage.clientWidth || innerWidth, h = stage.clientHeight || innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
 addEventListener('resize', resize); resize();
 camera.position.set(0, 7.6, 154);
+/* ---------- the entry: as your orb forms, the world bulges out from it for a breath, with a flicker of colour, then settles ---------- */
+const WARP = { t: -1, c: new THREE.Vector2(.5, .5), rt: null, sc: null, cam: null, m: null, v: new THREE.Vector2() };
+function warpStart(x, y) { if (!MOT) return; WARP.t = 0; WARP.c.set(x / innerWidth, 1 - y / innerHeight); }
+function warpRender(dt) {
+  if (WARP.t < 0) return false; const u = WARP.t / .6; if (u >= 1) { WARP.t = -1; return false; } WARP.t += dt;
+  renderer.getDrawingBufferSize(WARP.v);
+  if (!WARP.rt) { WARP.rt = new THREE.WebGLRenderTarget(WARP.v.x, WARP.v.y); WARP.sc = new THREE.Scene(); WARP.cam = new THREE.Camera();
+    WARP.m = new THREE.ShaderMaterial({ uniforms: { tD: { value: WARP.rt.texture }, uC: { value: WARP.c }, uK: { value: 0 }, uG: { value: 0 }, uAsp: { value: 1 }, uT: { value: 0 } }, depthTest: false, depthWrite: false,
+      vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
+      fragmentShader: 'uniform sampler2D tD; uniform vec2 uC; uniform float uK, uG, uAsp, uT; varying vec2 vUv; void main(){ vec2 d = vUv - uC; d.x *= uAsp; float r = length(d), b = uK * exp(-r * r * 4.0); vec2 dd = d * (1.0 - b); dd.x /= uAsp; vec2 uv = uC + dd;' +
+        ' float band = step(0.9, fract(sin(floor(vUv.y * 26.0 + uT * 50.0) * 91.7) * 437.5)) * uG; uv.x += band * 0.025 * (fract(uT * 37.0) - 0.5); float ca = 0.012 * uK + 0.005 * uG;' +
+        ' gl_FragColor = vec4(texture2D(tD, uv + vec2(ca, 0.0)).r, texture2D(tD, uv).g, texture2D(tD, uv - vec2(ca, 0.0)).b, 1.0); }' });
+    WARP.sc.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), WARP.m)); }
+  else if (WARP.rt.width !== WARP.v.x || WARP.rt.height !== WARP.v.y) WARP.rt.setSize(WARP.v.x, WARP.v.y);
+  const U = WARP.m.uniforms; U.uK.value = .34 * Math.sin(Math.PI * Math.min(1, u * 1.25)) * (1 - u); U.uG.value = 1 - sm(0, .35, u); U.uAsp.value = WARP.v.x / WARP.v.y; U.uT.value = WARP.t;
+  renderer.setRenderTarget(WARP.rt); renderer.render(scene, camera); renderer.setRenderTarget(null); renderer.render(WARP.sc, WARP.cam); return true;
+}
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(.05, (now - last) / 1000); last = now; time += dt;
@@ -1566,6 +1863,9 @@ function frame(now) {
   if (mv.hop > 0 && !FALL) { const k = mv.hop / .45; pos.addScaledVector(fwd, -110 * dt * k); pos.y += 46 * dt * (k - .35); mv.hop -= dt; }
   { const r = Math.hypot(pos.x, pos.z); if (r > 1500) { pos.x *= 1500 / r; pos.z *= 1500 / r; } }
   fallFrame(dt);
+  if (FORM.on) { FORM.since = FORM.since || now; if (now - FORM.since > 12000) { FORM.on = false; FORM.pin = null; FORM.k = 1; const bc = $('burst'); if (bc) bc.hidden = true; } } else FORM.since = 0;   // never get stuck forming
+  if (FORM.pin) { pos.copy(FORM.pin); mv.speed = 0; mv.vy = 0; }
+  if (LOBBY && started) { pos.y = 3.2; mv.vy = 0; mv.speed = Math.min(mv.speed, 22); mv.hop = 0; const r = Math.hypot(pos.x, pos.z); if (r > 46) { pos.x *= 46 / r; pos.z *= 46 / r; } }   // the lobby is a flat calm space   // you stay exactly where you'll form
   // ripples where you skim the mirror
   ripAcc += dt; if (pos.y < 7 && mv.speed > 3 && ripAcc > .12 && rho(pos.x, pos.z) < R0) { ripAcc = 0; ripple(pos.x, pos.z); }
   for (const R of RIPS) { R.t += dt; const k = R.t / 1.6; R.m.visible = k < 1; if (k < 1) { R.m.scale.setScalar(1.5 + k * 9); R.m.material.opacity = .35 * (1 - k); } }
@@ -1576,11 +1876,13 @@ function frame(now) {
   camT.copy(pos).addScaledVector(fwd, -back); camT.y += 4.4; look.copy(pos).addScaledVector(fwd, 16); look.y += 1.6;
   camA.set(pos.x * .2, 980, pos.z * .2 + 600); lookA.set(pos.x * .2, 0, pos.z * .2 - 30);
   camT.lerp(camA, viewK); look.lerp(lookA, viewK);
-  if (!specCam(dt)) {
+  if (FORM.snap) { camera.position.copy(camT); camera.lookAt(look); camera.fov = 60; camera.updateProjectionMatrix(); FORM.snap = false; }
+  if (LOBBY && started) { camera.position.set(pos.x, 58, pos.z + .01); camera.up.set(Math.sin(mv.yaw), 0, -Math.cos(mv.yaw)); camera.lookAt(pos.x, 0, pos.z); camera.fov = 50; camera.updateProjectionMatrix(); camera.up.set(0, 1, 0); SCALE.orb = 2.6; SCALE.label = 2.6; }   // straight down, turning with you
+  else if (!specCam(dt) && !FORM.pin) {
   camera.position.lerp(camT, 1 - Math.exp(-dt * (3.2 + viewK * 2)));
   camera.lookAt(look); camera.rotateZ(mv.roll * .35 * (1 - viewK));
   camera.fov = lerp(camera.fov, 60 + mv.speed * .25 * (1 - viewK), 1 - Math.exp(-dt * 3)); camera.updateProjectionMatrix(); }
-  sky.position.copy(camera.position); skyFrame(dt); BIRDS();
+  sky.position.copy(camera.position); skyFrame(dt); BIRDS(); hubFrame(dt);
   // the commons breathes; it glows when you're inside it
   const inside = inCommons(pos), cu = commons.material.uniforms.glow; cu.value = lerp(cu.value, inside ? .8 : .55 + .12 * Math.sin(time * 1.4), 1 - Math.exp(-dt * 3));
   PADM.forEach((m, i) => { m.material.opacity = (i === mySeat ? .75 : .4) + .1 * Math.sin(time * 1.2 + i); const A = i === mySeat ? me : [...OTHERS.values()].find(B => B.have && B.seat === i); m.material.color.set(A ? colOf(A) : SEATS[i].css); });
@@ -1595,15 +1897,23 @@ function frame(now) {
     placeAvatar(A, A.pos, dt); ringFrame(A, dt);
     if (A.v && ac) { const t = ac.currentTime, P = A.v.pan; if (P.positionX) { P.positionX.setValueAtTime(A.pos.x, t); P.positionY.setValueAtTime(A.pos.y, t); P.positionZ.setValueAtTime(A.pos.z, t); } else P.setPosition(A.pos.x, A.pos.y, A.pos.z); A.v.g.gain.setTargetAtTime(voiceGain(A) * pvol(A), t, .2); }
   }
-  floorMat.uniforms.time.value = fallsMat.uniforms.time.value = time;
+  floorMat.uniforms.time.value = fallsMat.uniforms.time.value = ORB_T.value = time;
   winFrame(dt); cardFrame(dt); tilesFrame(dt); solFrame(dt); landFrame(dt); syncTwins(); listen(); engineFrame(); netFrame(now);
   if (window.__CAM && Array.isArray(window.__RELAYS)) { const C = window.__CAM; if (C.follow) { camera.position.copy(C.follow.position).add(C.off); camera.lookAt(C.follow.position); } else { camera.position.copy(C.p); camera.lookAt(C.t); } }   // local test hook only
-  renderer.render(scene, camera);
+  if (LOBBY) lobbyView();
+  if (!warpRender(dt)) renderer.render(scene, camera);
 }
 aimSky(); for (let i = 0; i < 4; i++) skyMat.uniforms[SKYU[i]].value.copy(skyGoal[i]);
+{ const boot = document.createElement('div'); boot.id = 'boot'; document.body.appendChild(boot); let n = 0, fontsOK = false;
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => { fontsOK = true; });
+  try { renderer.compile(scene, camera); if (L3.r) L3.r.compile(L3.sc, L3.cam); } catch (e) {}
+  const lift = () => { if (++n < 6 || !fontsOK) return requestAnimationFrame(lift); boot.classList.add('gone'); setTimeout(() => boot.remove(), 900); }; requestAnimationFrame(lift);
+  setTimeout(() => { fontsOK = true; }, 2500); }
 requestAnimationFrame(frame);
-seatsUI(); applyTheme(); landBuild(); setColor(me, myCol); connect(); try { if (sessionStorage.getItem('onaroom.host')) { sessionStorage.removeItem('onaroom.host'); hostOpts(true); } } catch (e) {}
-if (Array.isArray(window.__RELAYS)) window.__T = { get CFG() { return CFG; }, applyCfg, archOpen, archSet, hostOpts, rho, get FALL() { return FALL; }, hop, R1, hAt, OTHERS, WINS, TILES, SOL, SPEC, winSet, openCard, closeCard, openSolar, closeSolar, solActivate, solStep, solBack, toggleFeeds, openFeed, flyTo, specOn, specOff, specNext, skyFan, setSky, get myS() { return myS; }, get CARD() { return CARD; }, get seat() { return mySeat; }, get me() { return winMe(); }, get col() { return myCol; }, get pos() { return pos; }, get started() { return started; }, FORM, get mv() { return mv; } };   // local test hook only
+seatsUI(); applyTheme(); landBuild(); setColor(me, myCol); connect();
+try { if (sessionStorage.getItem('onaroom.host')) { sessionStorage.removeItem('onaroom.host'); L3.mode = 'create'; $('lt1').classList.add('dim'); spread(); }
+  const ai = sessionStorage.getItem('onaroom.autoin'); if (ai) { sessionStorage.removeItem('onaroom.autoin'); const i = ORBS.findIndex(o => o.c === ai); if (i >= 0) { spread(); L3.sel = i; myCol = ai; setColor(me, myCol); setTimeout(begin, 700); } } } catch (e) {}
+if (Array.isArray(window.__RELAYS)) window.__T = { get CFG() { return CFG; }, applyCfg, archOpen, archSet, hostOpts, rho, get FALL() { return FALL; }, hop, R1, hAt, OTHERS, WINS, TILES, SOL, SPEC, winSet, openCard, closeCard, openSolar, closeSolar, solActivate, solStep, solBack, toggleFeeds, openFeed, flyTo, specOn, specOff, specNext, skyFan, setSky, get myS() { return myS; }, get CARD() { return CARD; }, get seat() { return mySeat; }, get me() { return winMe(); }, get col() { return myCol; }, get pos() { return pos; }, get started() { return started; }, FORM, get mv() { return mv; }, get selfId() { return selfId; }, hubId, NET, landPick: i => { spread(); choose(i); } };   // local test hook only
 })();
 </script>
 </body>
