@@ -206,6 +206,10 @@ button,input{outline:none}
 .lt{opacity:0;animation:lglIn .9s ease .45s forwards}
 #intro.named .lt{animation:none;opacity:.22}
 .lt.dim{animation:none}
+/* v21: making a room — the orb picker steps aside so the room shows */
+#intro.setup .larrow{opacity:0!important;pointer-events:none!important}
+#intro.arch{background:none!important;pointer-events:none}
+#intro.arch #lgl,#intro.arch #ltop,#intro.arch .lt,#intro.arch .larrow{opacity:0!important;pointer-events:none!important;transition:opacity .35s}
 </style>
 </head>
 <body class="pixel">
@@ -595,10 +599,13 @@ function hubPass(name, d, from) {   // only the hub passes things on, and only t
 }
 // lobby call mode: only the orbs (and their names and words) are drawn, over a soft blue gradient
 let LOBBG = null; const KEEP = new Set();
+const LOBHID = new Set();
 function lobbyView() {
+  if (ARCH.on) { if (scene.background === LOBBG) scene.background = null; for (const o of LOBHID) o.visible = true; LOBHID.clear(); return; }   // v21: architect previews the real room
+  if (LOBBG) scene.background = LOBBG;
   if (!LOBBG) { const c = document.createElement('canvas'); c.width = 4; c.height = 256; const x = c.getContext('2d'), g = x.createLinearGradient(0, 0, 0, 256); g.addColorStop(0, '#7fb2ff'); g.addColorStop(.55, '#4f86e8'); g.addColorStop(1, '#2c4fb0'); x.fillStyle = g; x.fillRect(0, 0, 4, 256); LOBBG = new THREE.CanvasTexture(c); scene.background = LOBBG; }
   KEEP.clear(); for (const A of [me, ...OTHERS.values()]) for (const o of [A.sp, A.halo, A.label, A.bubble, A.ring]) if (o) KEEP.add(o);
-  for (const o of scene.children) if (!KEEP.has(o) && !o.isCamera && !o.isLight) o.visible = false;
+  for (const o of scene.children) if (!KEEP.has(o) && !o.isCamera && !o.isLight) { if (o.visible) LOBHID.add(o); o.visible = false; }
 }
 function hubFrame(dt) {
   if (!room) return; NET.t += dt; if (NET.t < 2.5) return; NET.t = 0; seeSend();
@@ -1369,7 +1376,7 @@ function landHit(x, y) { let best = -1, bz = -9; L3.O.forEach((q, i) => { if (Ma
 function landLetGo() { L3.let = 1; }
 function landHideSel() { L3.hid = true; }
 $('intro').addEventListener('pointerdown', e => {
-  if (started || e.target.closest('input,button,#host,#arch,#lt1,#lt2')) return; const i = landHit(e.clientX, e.clientY);
+  if (started || $('intro').classList.contains('setup') || e.target.closest('input,button,#host,#arch,#lt1,#lt2')) return; const i = landHit(e.clientX, e.clientY);
   if (L3.state === 'bundle') { spread(); return; }   // the first touch opens them up
   if (i >= 0) choose(i);
 });
@@ -1380,10 +1387,10 @@ addEventListener('keydown', e => { if (started || $('intro').hidden) return; if 
 function landMarks() {}
 function landFrame(dt) {
   if (!L3.r || $('intro').hidden) return; const t = time, w = L3.w, h = L3.h, S = L3.S;
-  L3.idle += dt; L3.rot += dt * (L3.state === 'bundle' ? .18 : .11);
-  L3.Rx = Math.min(w * .43, 400); L3.Ry = clamp(h * .11, 56, 140); L3.cy = lerp(L3.cy, h * (L3.state === 'bundle' ? .5 : .4), 1 - Math.exp(-dt * 4));
+  L3.idle += dt; L3.rot += dt * (L3.state === 'bundle' ? .18 : .11); L3.setK = lerp(L3.setK || 0, $('intro').classList.contains('setup') ? 1 : 0, 1 - Math.exp(-dt * 6));
+  L3.Rx = Math.min(w * .43, 400); L3.Ry = clamp(h * .12 + L3.Rx * .12, 70, 190); L3.cy = lerp(L3.cy, h * (L3.state === 'bundle' ? .5 : .4), 1 - Math.exp(-dt * 4));
   L3.Sy = L3.Sx = S;
-  let hov = -1; if (L3.px > 0) hov = landHit(L3.px, L3.py); if (hov !== L3.hover) { L3.hover = hov; if (hov >= 0) sfx('tick'); }
+  let hov = -1; if (L3.px > 0 && (L3.setK || 0) < .5) hov = landHit(L3.px, L3.py); if (hov !== L3.hover) { L3.hover = hov; if (hov >= 0) sfx('tick'); }
   if (L3.state === 'bundle' && hov >= 0 && L3.idle < .1) { L3.hoverT = (L3.hoverT || 0) + dt; if (L3.hoverT > .45) spread(); }
   const cr = Math.cos(L3.rot), sr = Math.sin(L3.rot);
   L3.O.forEach((q, i) => {
@@ -1399,7 +1406,7 @@ function landFrame(dt) {
     const z = q.p.z, k = 1 / (1 - z * .28), ring = L3.state === 'pick' && i !== L3.sel, size = S * .44 * k * (ring ? .55 : 1) * (i === hov ? 1.12 : 1) * (i === L3.sel && L3.let ? 1 + Math.min(.15, L3.let * .2) : 1);
     q.z = z; q.sx = L3.cx + q.p.x * L3.Sx * k; q.sy = L3.cy - q.p.y * L3.Sy * k; q.size = size;
     q.m.position.set(q.sx, h - q.sy, 0); q.m.scale.set(size, size, 1); q.m.renderOrder = Math.round(z * 100);
-    const u = q.m.material.uniforms, shy = clamp((z + 1) / 2, 0, 1); u.opacity.value = (i === L3.sel && L3.hid) ? 0 : (L3.let && i !== L3.sel ? Math.max(0, .55 - L3.let) : .55 + .45 * shy); u.uTint.value.setScalar(.72 + .28 * shy);
+    const u = q.m.material.uniforms, shy = clamp((z + 1) / 2, 0, 1); u.opacity.value = (i === L3.sel && L3.hid) ? 0 : (L3.let && i !== L3.sel ? Math.max(0, .55 - L3.let) : .55 + .45 * shy) * (i === L3.sel ? 1 : 1 - L3.setK); u.uTint.value.setScalar(.72 + .28 * shy);
     if (L3.px > 0) u.uLook.value.set(clamp((L3.px - q.sx) / size, -1, 1), clamp(-(L3.py - q.sy) / size, -1, 1));
   });
   if (L3.let) L3.let += dt;
@@ -1425,7 +1432,7 @@ function burst(done) {
   if (!MOT) { FORM.k = 1; done(); return; }
   FORM.on = true; FORM.k = 0;
   const c = $('burst'), x = c.getContext('2d'), W = c.width = innerWidth, H = c.height = innerHeight;
-  const cx = r.left + r.width / 2, cy = r.top + r.height / 2, R = r.width * .47, P = palOf(myCol), cols = [P.g[0], P.g[1], P.g[2]];
+  const q0 = L3.O[L3.sel], cx = q0 ? q0.sx : r.left + r.width / 2, cy = q0 ? q0.sy : r.top + r.height / 2, R = (q0 ? q0.size * .68 : r.width) * .47, P = palOf(myCol), cols = [P.g[0], P.g[1], P.g[2]];   // v21: the dots start from the orb you picked
   // 1 · breathe in
   L.style.transition = 'transform .24s cubic-bezier(.3,0,.2,1), filter .24s'; L.style.animation = 'none'; L.style.transform = 'translate(-50%,-50%) scale(1.14)'; L.style.filter = 'brightness(1.35)';
   sfx('whoosh');
@@ -1440,7 +1447,8 @@ function burst(done) {
     const hx = (c, a) => c + Math.round(clamp(a, 0, 1) * 255).toString(16).padStart(2, '0');
     const bloom = (X, Y, R, a) => { if (a <= .01) return; const r = x.createRadialGradient(X, Y, 0, X, Y, R); r.addColorStop(0, hx('#ffffff', a)); r.addColorStop(.22, hx(P.g[0], a * .7)); r.addColorStop(.55, hx(P.g[1], a * .18)); r.addColorStop(1, hx(P.g[1], 0)); x.fillStyle = r; x.beginPath(); x.arc(X, Y, R, 0, TAU); x.fill(); };
     (function step(now) {
-      const dt = Math.min(.1, (now - last) / 1000); last = now; t += dt; if (t > 9 && !popped) gt = Math.max(gt, 3);   // slow devices still finish x.clearRect(0, 0, W, H);
+      const dt = Math.min(.1, (now - last) / 1000); last = now; t += dt; if (t > 9 && !popped) gt = Math.max(gt, 3);   // slow devices still finish
+      x.clearRect(0, 0, W, H);
       const O = FORM.O || orbOnScreen();
       // 3 · hang as a slow cloud until you have a place (or 2.4s pass), then gather
       if (gt < 0 && t > .55 && (mySeat >= 0 || t > 2.4)) { if (!FORM.pin) { AP = null; FORM.pin = pos.clone(); FORM.snap = true; } else if (!FORM.snap) { FORM.O = orbOnScreen(); gt = 0; sfx('gather'); } } if (gt >= 0) gt += dt;   // pin the orb and the camera first, then gather to that exact spot
@@ -1466,10 +1474,10 @@ function burst(done) {
       gl = lerp(gl, f, 1 - Math.exp(-dt * 10)); x.globalAlpha = 1;
       const vr = O.r * .45;   // the orb's visible body
       if (!popped) bloom(O.x, O.y, vr * (1.3 + gl * 1.1), gl * .85);   // a light gathers where you will be, the orb grows inside it
-      if (!popped && (f > .96 || gt > 2.2)) { popped = true; sfx('form'); ripple(pos.x, pos.z); FORM.t = 0; warpStart(O.x, O.y); }
+      if (!popped && (f > .96 || gt > 2.2)) { popped = true; sfx('form'); ripple(pos.x, pos.z); FORM.t = 0; }
       if (popped) { FORM.t += dt; const u = Math.min(1, FORM.t / .45), w = Math.min(1, FORM.t / .7); FORM.k = 1 + Math.sin(u * Math.PI) * .22 * (1 - u);
         if (FORM.t > .6 && FORM.on) { FORM.on = false; FORM.pin = null; FORM.O = O; }   // formed: you're free to move while the flash and name finish
-        const w2 = Math.min(1, FORM.t / .95); bloom(O.x, O.y, vr * (1.5 + w2 * 3), 1 * (1 - w2) * (1 - w2));   // one soft, bright flash that dissolves outward as the orb fades in
+        bloom(O.x, O.y, vr * (1.6 + w * 2.6), .9 * (1 - w) * (1 - w));   // one soft, bright flash that dissolves outward as the orb fades in
         const na = sm(0, .35, FORM.t) * (1 - sm(1.2, 1.7, FORM.t)); if (na > .01 && myName) { x.globalCompositeOperation = 'source-over'; x.globalAlpha = na; x.font = '700 ' + Math.round(Math.max(20, vr * .55)) + 'px "Pixelify Sans", sans-serif'; x.textAlign = 'center'; x.textBaseline = 'bottom';
           x.fillStyle = '#000'; x.fillText(myName, O.x + 2, O.y - vr * 1.25 + 2 - (1 - na) * 8); x.fillStyle = TC; x.fillText(myName, O.x, O.y - vr * 1.25 - (1 - na) * 8); x.globalAlpha = 1; } }   // your name fades in above you during the crossover
       x.globalCompositeOperation = 'source-over';
@@ -1690,7 +1698,7 @@ $('fresh').appendChild(orbBtn('moon', 52, '✨', 'Make a new room', () => hostOp
 /* ---------- host: a new room starts as it is, random, or architected ---------- */
 const randCfg = () => ({ n: 3 + Math.floor(Math.random() * 10), t: Math.floor(Math.random() * THEMES.length), s: Math.floor(Math.random() * SHAPES.length) });
 function hostOpts(on) {
-  const h = $('host'); h.hidden = !on; document.querySelector('.lacts').hidden = on; $('name').hidden = on; $('lgob').hidden = on; if (!on) return; if (h.childElementCount) return;
+  const h = $('host'); h.hidden = !on; $('intro').classList.toggle('setup', on); document.querySelector('.lacts').hidden = on; $('name').hidden = on; $('lgob').hidden = on; if (!on) return; if (h.childElementCount) return;
   const add = (b, w) => { const d = document.createElement('div'); d.className = 'lact'; d.appendChild(b); d.insertAdjacentHTML('beforeend', '<b>' + w + '</b>'); h.appendChild(d); };
   add(orbBtn(myCol, 56, '+', 'A new room as it is', () => goRoom(DEFCFG)), 'default');
   add(orbBtn('saturn', 56, '🎲', 'A new room, randomized', () => goRoom(randCfg())), 'random');
@@ -1699,9 +1707,9 @@ function hostOpts(on) {
 }
 const ARCH = { on: false, cfg: null, was: null };
 function archOpen() {
-  ARCH.on = true; ARCH.was = Object.assign({}, CFG); ARCH.cfg = Object.assign({}, CFG); $('land').hidden = true; $('arch').hidden = false; view = 'above'; sfx('whoosh'); archBuild();
+  ARCH.on = true; $('intro').classList.add('arch'); ARCH.was = Object.assign({}, CFG); ARCH.cfg = Object.assign({}, CFG); $('land').hidden = true; $('arch').hidden = false; view = 'above'; sfx('whoosh'); archBuild();
 }
-function archClose() { ARCH.on = false; $('arch').hidden = true; $('land').hidden = false; view = 'follow'; applyCfg(ARCH.was); landBuild(); sfx('back'); }
+function archClose() { ARCH.on = false; $('intro').classList.remove('arch'); $('arch').hidden = true; $('land').hidden = false; view = 'follow'; applyCfg(ARCH.was); landBuild(); sfx('back'); }
 function archSet(p) { Object.assign(ARCH.cfg, p); applyCfg(Object.assign({}, ARCH.cfg)); archBuild(); sfx('tick'); }
 function archBuild() {
   const A = $('arch'), C = ARCH.cfg; A.textContent = '';
